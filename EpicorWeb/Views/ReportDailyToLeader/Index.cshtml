@@ -1,0 +1,144 @@
+﻿@using System.Data;
+@{
+    ViewData["Title"] = "Vinam Oil Tools";
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+    @model System.Data.DataTable
+}
+
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords"
+          content="wrappixel, admin dashboard, html css dashboard, web dashboard, bootstrap 5 admin, bootstrap 5, css3 dashboard, bootstrap 5 dashboard, Matrix lite admin bootstrap 5 dashboard, frontend, responsive bootstrap 5 admin template, Matrix admin lite design, Matrix admin lite dashboard bootstrap 5 dashboard template">
+    <meta name="description"
+          content="Matrix Admin Lite Free Version is powerful and clean admin dashboard template, inpired from Bootstrap Framework">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../../assets/images/favicon.png">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="../../assets/extra-libs/multicheck/multicheck.css">
+    <link href="../../assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="../../dist/css/style.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin5" data-sidebartype="full"
+         data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full">
+        <div class="page-wrapper" style="margin-left:0px">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Vinam Data</h5>
+                                <div class="table-responsive">
+                                    <table id="zero_config" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Payroll Data</th>
+                                                <th>Employee</th>
+                                                <th>Name</th>
+                                                <th>Job</th>
+                                                <th>JobOpr</th>
+                                                <th>Operation</th>
+                                                <th>Labor Type</th>
+                                                <th>Labor Hrs</th>
+                                                <th>Labor Quantity</th>
+                                                <th>Scrap Quantity</th>
+                                                <th>Scrap Reason</th>
+                                                <th>Est.Setup Hours</th>
+                                                <th>Est.Prod Hours</th>
+                                                <th>Run Qty</th>
+                                                <th>Resource ID</th>
+                                                <th>Clock In Date</th>
+                                                <th>Clock In</th>
+                                                <th>Clock Out</th>
+                                                <th>Status</th>
+                                                <th>Direct Labor Expense</th>
+                                                <th>LaborOpr</th>
+                                                <th>Complete</th>
+                                                <th>Labor EFF</th>
+                                                <th>Note</th>
+                                                <th>Indirect Code</th>
+                                                <th>Address</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (DataRow row in Model.Rows)
+                                            {
+                                                <tr>
+                                                    <td>@row["LaborDtl_PayrollDate"]</td>
+                                                    <td>@row["LaborDtl_EmployeeNum"]</td>
+                                                    <td>@row["EmpBasic_Name"]</td>
+                                                    <td>@row["LaborDtl_JobNum"]</td>
+                                                    <td>@row["JobOper_OprSeq"]</td>
+                                                    <td>@row["LaborDtl_OpCode"]</td>
+                                                    <td>@row["LaborDtl_LaborType"]</td>
+                                                    <td>@row["LaborDtl_LaborHrs"]</td>
+                                                    <td>@row["LaborDtl_LaborQty"]</td>
+                                                    <td>@row["LaborDtl_ScrapQty"]</td>
+                                                    <td>@row["LaborDtl_ScrapReasonCode"]</td>
+                                                    <td>@row["JobOper_EstSetHours"]</td>
+                                                    <td>@row["JobOper_EstProdHours"]</td>
+                                                    <td>@row["JobOper_RunQty"]</td>
+                                                    <td>@row["LaborDtl_ResourceID"]</td>
+                                                    <td>@row["LaborDtl_ClockInDate"]</td>
+                                                    <td>@row["LaborDtl_ClockinTime"]</td>
+                                                    <td>@row["LaborDtl_ClockOutTime"]</td>
+                                                    <td>@row["EmpBasic_EmpStatus"]</td>
+                                                    <td>@row["EmpBasic_ExpenseCode"]</td>
+                                                    <td>@row["LaborDtl_OprSeq"]</td>
+                                                    <td>@row["LaborDtl_Company"]</td>
+                                                    <td>@row["Calculated_LaborEFF"]</td>
+                                                    <td>@row["LaborDtl_LaborNote"]</td>
+                                                    <td>@row["LaborDtl_IndirectCode"]</td>
+                                                    <td>@row["EmpBasic_Address"]</td>
+                                                </tr>
+                                            }
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/libs/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- slimscrollbar scrollbar JavaScript -->
+    <script src="../../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../../assets/extra-libs/sparkline/sparkline.js"></script>
+    <!--Wave Effects -->
+    <script src="../../dist/js/waves.js"></script>
+    <!--Menu sidebar -->
+    <script src="../../dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="../../dist/js/custom.min.js"></script>
+    <!-- this page js -->
+    <script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+    <script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+    <script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+    <script>
+        /****************************************
+         *       Basic Table                   *
+         ****************************************/
+        $('#zero_config').DataTable();
+    </script>
+
+</body>
+
+</html>

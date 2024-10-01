@@ -1,0 +1,236 @@
+﻿@using System.Data;
+@using System.Globalization;
+@{
+    ViewData["Title"] = "Vinam Oil Tools";
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+    @model System.Data.DataTable
+
+}
+
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords"
+          content="wrappixel, admin dashboard, html css dashboard, web dashboard, bootstrap 5 admin, bootstrap 5, css3 dashboard, bootstrap 5 dashboard, Matrix lite admin bootstrap 5 dashboard, frontend, responsive bootstrap 5 admin template, Matrix admin lite design, Matrix admin lite dashboard bootstrap 5 dashboard template">
+    <meta name="description"
+          content="Matrix Admin Lite Free Version is powerful and clean admin dashboard template, inpired from Bootstrap Framework">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../../assets/images/favicon.png">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="../../assets/extra-libs/multicheck/multicheck.css">
+    <link href="../../assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="../../dist/css/style.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        /* Custom CSS to make datatable scrollable */
+
+        .card .card-title {
+            font-weight: bold;
+            margin-bottom: 0px;
+        }
+
+        .border-top {
+            padding: 10px; /* Thêm padding nếu cần */
+        }
+
+        #export-excel-button {
+            margin-right: 9em; /* Điều chỉnh khoảng cách bên phải nếu cần */
+            padding-right: 1em; /* Điều chỉnh padding bên phải nếu cần */
+        }
+
+        .card-body {
+            padding: 0.5rem;
+        }
+
+        .dataTables_filter input {
+            width: 17em !important; /* Adjust the width as needed */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin5" data-sidebartype="full"
+         data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full">
+        <div class="page-wrapper" style="margin-left:0px">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h3 class="card-title">VINAM TOOL SLOW MOVING</h3>
+                                    <button type="submit" class="btn btn-md btn-success text-white invoiceLoc ml-auto"
+                                            id="export-excel-button" name="export-excel-button">
+                                        Xuất Excel
+                                    </button>
+                                </div>
+                                <div class="table-container">
+                                    <div class="table-responsive">
+                                        <table id="zero_config" class="table table-striped table-bordered">
+                                            <thead style="font-weight:bold !important">
+                                                <tr>
+                                                    <th>PART</th>
+                                                    <th>DESCRIPTION</th>
+                                                    <th>WAREHOUSE</th>
+                                                    <th>LOT NUM</th>
+                                                    <th>BEGIN QUANTITY</th>
+                                                    <th>RECEIVED QUANTITY</th>
+                                                    <th>ISSUED QUANTITY</th>
+                                                    <th>END QUANTITY</th>
+                                                    <th>END AMOUNT USD</th>
+                                                    <th>CLASS ID</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="dataTables_scroll">
+                                                @foreach (DataRow row in Model.Rows)
+                                                {
+                                                    <tr>
+                                                        <td>@row["Part"]</td>
+                                                        <td>@row["Description"]</td>
+                                                        <td>@row["Warehouse"]</td>
+                                                        <td>@row["LotNum"]</td>
+                                                        @{
+                                                            decimal decimalValue = decimal.Parse(row["BeginQuantity"].ToString(), CultureInfo.InvariantCulture);
+                                                            decimal BeginQuantity = Math.Round(decimalValue, 2, MidpointRounding.ToZero);
+                                                        }
+                                                        <td>@BeginQuantity</td>
+                                                        @* <td>@row["BeginQuantity"]</td> *@
+                                                        @{
+                                                            decimal decimalValue1 = decimal.Parse(row["ReceivedQuantity"].ToString(), CultureInfo.InvariantCulture);
+                                                            decimal ReceivedQuantity = Math.Round(decimalValue1, 2, MidpointRounding.ToZero);
+                                                        }
+                                                        <td>@BeginQuantity</td>
+                                                        @* <td>@row["ReceivedQuantity"]</td> *@
+                                                        @{
+                                                            decimal decimalValue2 = decimal.Parse(row["IssuedQuantity"].ToString(), CultureInfo.InvariantCulture);
+                                                            decimal IssuedQuantity = Math.Round(decimalValue2, 2, MidpointRounding.ToZero);
+                                                        }
+                                                        <td>@IssuedQuantity</td>
+                                                        @* <td>@row["IssuedQuantity"]</td> *@
+                                                        @{
+                                                            decimal decimalValue3 = decimal.Parse(row["EndQuantity"].ToString(), CultureInfo.InvariantCulture);
+                                                            decimal EndQuantity = Math.Round(decimalValue3, 2, MidpointRounding.ToZero);
+                                                        }
+                                                        <td>@EndQuantity</td>
+                                                        @* <td>@row["EndQuantity"]</td> *@
+                                                        @{
+                                                            decimal decimalValue4 = decimal.Parse(row["EndAmountUSD"].ToString(), CultureInfo.InvariantCulture);
+                                                            decimal EndAmountUSD = Math.Round(decimalValue4, 2, MidpointRounding.ToZero);
+                                                        }
+                                                        <td>@EndAmountUSD</td>
+                                                        @* <td>@row["EndAmountUSD"]</td> *@
+                                                        <td>@row["ClassID"]</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" type="text/css"
+          href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+    <link href="~/css/spinner.css" rel="stylesheet" />
+    <script src="../../assets/libs/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- slimscrollbar scrollbar JavaScript -->
+    <script src="../../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../../assets/extra-libs/sparkline/sparkline.js"></script>
+    <!--Wave Effects -->
+    <script src="../../dist/js/waves.js"></script>
+    <!--Menu sidebar -->
+    <script src="../../dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="../../dist/js/custom.min.js"></script>
+    <!-- this page js -->
+    <script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+    <script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+    <script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+    <script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.2.4/js/dataTables.fixedHeader.min.js"></script>
+    <script>
+        /****************************************
+         *       Basic Table                   *
+         ****************************************/
+        $('#zero_config').DataTable({
+            scrollY: '550px', // Chiều cao của phần cuộn dọc
+            scrollX: true, // Bật cuộn ngang
+            scrollCollapse: false, // Cho phép bảng bị thu gọn khi không đủ dữ liệu để cuộn
+            paging: false // Bỏ phân trang nếu không cần
+        });
+
+        /*datwpicker*/
+        jQuery('.datepicker-autoclose').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom'
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#export-excel-button").click(function (e) {
+                e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+                // Vô hiệu hóa button
+                $(this).prop("disabled", true);
+
+                // Gửi dữ liệu bằng Ajax đến controller
+                $.ajax({
+                    url: "/ToolSlowMoving/ExportExcel", // Đường dẫn đến action trong controller
+                    type: "POST",
+                    data: {
+                        // Bạn có thể thêm dữ liệu cần thiết ở đây
+                    },
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'VinamToolSlowMoving.xlsx'; // Đặt tên file Excel
+                        link.style.display = 'none';
+
+                        document.body.appendChild(link);
+                        link.click();
+
+                        window.URL.revokeObjectURL(link.href);
+                        document.body.removeChild(link);
+
+                        // Kích hoạt lại button
+                        $("#export-excel-button").prop("disabled", false);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Lỗi: ", error);
+                        // Kích hoạt lại button
+                        $("#export-excel-button").prop("disabled", false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

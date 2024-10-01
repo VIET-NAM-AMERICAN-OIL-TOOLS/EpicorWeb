@@ -1,0 +1,134 @@
+﻿@using System.Data;
+@using EpicorWeb.AllFunction;
+@{
+    @model System.Data.DataTable
+
+}
+<aside class="left-sidebar" data-sidebarbg="skin5">
+    <!-- Sidebar scroll-->
+    <div class="scroll-sidebar">
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav" style="font-size:.8em">
+            <ul id="sidebarnav" class="pt-4">
+                <!-- Gọi hàm RenderCheckBoxSidebar tại đây -->
+                @{
+                    RenderCheckBoxSidebar(Model);
+
+                }
+            </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+    </div>
+    <!-- End Sidebar scroll-->
+</aside>
+<!--Menu sidebar -->
+<script src="~/dist/js/sidebarmenu.js"></script>
+
+@functions {
+
+//     -- thêm class="ajax-link" để thực thi ajax phía dưới
+// <a href="@Url.Action("Welcome", "HelloWorld" , new { name = "John", numTimes = 3 })" class="ajax-link">Welcome</a>
+    void RenderCheckBoxSidebar(DataTable data, List<int> renderedIDs = null, int level = 0)
+    {
+        // Khởi tạo danh sách renderedIDs nếu nó chưa được khởi tạo
+        renderedIDs ??= new List<int>();
+
+        foreach (DataRow row in data.Rows)
+        {
+            if (!renderedIDs.Contains(int.Parse(row["ID"].ToString())))
+            {
+                renderedIDs.Add(int.Parse(row["ID"].ToString()));
+                var hasChildren = new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString()));
+                string link = row["Url"].ToString();
+                <li class="sidebar-item">
+                @{
+                    if (hasChildren)
+                {
+                    <a class="sidebar-link @(hasChildren ? "has-arrow waves-effect waves-dark" : "")"
+                       href="@link"
+                       aria-expanded="false">
+                       <i class="mdi mdi-account-box-outline"></i>
+                        <span class="hide-menu">@row["Name"]</span>
+                    </a>
+                }
+                else
+                {
+                  <a class="ajax-link sidebar-link @(hasChildren ? "has-arrow waves-effect waves-dark" : "")"
+                       href="@link"
+                       aria-expanded="false">
+                       <i class="mdi mdi-arrow-right-bold"></i>
+                        <span class="hide-menu">@row["Name"]</span>
+                    </a>      
+                }
+                }
+                
+                    @if (hasChildren)
+                    {
+                        var children = new CategoryAdmin().GetChildren(int.Parse(row["ID"].ToString()));
+
+                        if (children.Rows.Count > 0)
+                        {
+                            <ul aria-expanded="false" class="collapse first-level">
+                                @{
+                                    RenderCheckBoxSidebar(children, renderedIDs, level + 1);
+                                }
+                            </ul>
+                        }
+                    }
+                </li>
+            }
+        }
+    }
+}
+
+@section script {
+    <script src="../../dist/js/custom.min.js"></script>
+
+    //phân nhánh menu
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var treeItems = document.querySelectorAll('.tree li:has(ul)');
+
+            treeItems.forEach(function (item) {
+                item.classList.add('parent_li');
+                var span = item.querySelector('span');
+                if (span) {
+                    span.setAttribute('title', 'Collapse this branch');
+
+                    var icon = span.querySelector('i'); // Lấy thẻ <i> bên trong thẻ <span>
+                    if (icon) {
+                        icon.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            var children = item.querySelectorAll('ul > li');
+
+                            var isVisible = false;
+                            for (var i = 0; i < children.length; i++) {
+                                if (children[i].style.display !== 'none') {
+                                    isVisible = true;
+                                    break;
+                                }
+                            }
+
+                            if (isVisible) {
+                                Array.prototype.forEach.call(children, function (child) {
+                                    child.style.display = 'none';
+                                });
+                                span.setAttribute('title', 'Expand this branch');
+                                icon.classList.remove('fa-minus-square');
+                                icon.classList.add('fa-plus-square');
+                            } else {
+                                Array.prototype.forEach.call(children, function (child) {
+                                    child.style.display = 'block';
+                                });
+                                span.setAttribute('title', 'Collapse this branch');
+                                icon.classList.remove('fa-plus-square');
+                                icon.classList.add('fa-minus-square');
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+}

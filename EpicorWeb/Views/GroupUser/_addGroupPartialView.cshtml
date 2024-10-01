@@ -1,0 +1,80 @@
+﻿@model EpicorWeb.Models.Groups
+
+<!-- Modal -->
+<div class="modal fade" id="addGroups" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tạo nhóm người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form asp-action="CreateGroup" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Name" class="control-label"></label>
+                                <input asp-for="Name" class="form-control" id="NameGroup" name="Name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Description" class="control-label"></label>
+                                <input asp-for="Description" class="form-control" id="DescriptionGroup" name="Description" />
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Thêm" class="btn btn-primary" id="btnCreateGroup" />
+                            </div>
+                            <div id="resultMessage" style="color: green;"></div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Thoát</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section script{
+    @* <script>
+        $(document).ready(function () {
+            // Sự kiện khi nút "Xuất Excel Mới" được nhấp
+            $("#btnCreateGroup").click(function () {
+                var name = $("#NameGroup").val();
+                var description = $("#DescriptionGroup").val();
+
+                // Kiểm tra xem startDate và endDate đã được chọn hay chưa
+                if (!Name) {
+                    alert("Vui lòng nhập tên nhóm.");
+                    return; // Dừng xử lý nếu không chọn đủ hai ngày
+                }
+
+                // Vô hiệu hóa button
+                $("#btnCreateGroup").prop("disabled", true);
+
+                // Gửi dữ liệu bằng Ajax đến controller
+                $.ajax({
+                    url: "/GroupUserController/CreateGroup", // Đường dẫn đến action trong controller
+                    type: "POST",
+                    data: {
+                        name: name,
+                        description: description
+                    },
+                    success: function (data) {
+                        // Kích hoạt lại button
+                        $("#btnCreateGroup").prop("disabled", false);
+                        $("#resultMessage").text("Tạo mới thành công");
+                    },
+                    error: function () {
+                        // Xử lý lỗi ở đây
+                        $("#resultMessage").text("Tạo mới thất bại");
+                    }
+                });
+            });
+        });
+    </script> *@
+    }

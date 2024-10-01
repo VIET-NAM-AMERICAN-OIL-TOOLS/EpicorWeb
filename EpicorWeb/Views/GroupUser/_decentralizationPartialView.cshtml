@@ -1,0 +1,89 @@
+﻿@using System.Data;
+@using EpicorWeb.AllFunction;
+@model System.Data.DataTable
+@{
+    var checkedIds = ViewBag.CheckedMenuIds as List<int> ?? new List<int>();
+}
+<!-- Modal -->
+<div class="modal fade" id="editGroups" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Phân quyền Nhóm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <div class="col-md-12 tree">
+                                        @{
+                                            RenderCheckBoxList(Model, checkedIds);
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group" style="margin-left:4em">
+                                 <input type="submit" value="Lưu" class="btn btn-primary" id="btnDecentralization" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section css {
+    <link href="~/css/categoryadmin.css" rel="stylesheet" />
+}
+
+@functions {
+    //đệ quy tạo treelist
+    void RenderCheckBoxList(DataTable data, List<int> checkedIds, List<int> renderedIDs = null, int level = 0)
+    {
+        // Khởi tạo danh sách renderedIDs nếu nó chưa được khởi tạo
+        renderedIDs ??= new List<int>();
+
+        <ul class="checkbox-list" style="list-style-type:none">
+            @foreach (DataRow row in data.Rows)
+            {
+                // Kiểm tra xem ID của mục hiện tại đã được xuất ra chưa
+                if (!renderedIDs.Contains(int.Parse(row["ID"].ToString())))
+                {
+                    // Nếu chưa, thêm ID vào danh sách renderedIDs
+                    renderedIDs.Add(int.Parse(row["ID"].ToString()));
+                    bool isChecked = checkedIds.Contains(int.Parse(row["ID"].ToString()));
+                    
+                    <li>
+                        <span>
+                            @if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
+                            {
+                                <i class="fa fa-minus-square"></i>
+                                <input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px" onchange="checkChildren(this)" @(isChecked ? "checked" : "")>
+
+                            }
+                            else
+                            {
+                                <input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px" @(isChecked ? "checked" : "")>
+                            }
+                            <label for="@(row["ID"])">@row["Name"]</label>
+                            @if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
+                            {
+                                var children = new CategoryAdmin().GetChildren(int.Parse(row["ID"].ToString()));
+                                if (children.Rows.Count > 0)
+                                {
+                                    // Gọi đệ quy và chuyển renderedIDs cho hàm đệ quy
+                                    RenderCheckBoxList(children, checkedIds, renderedIDs, level + 1);
+                                }
+                            }
+                        </span>
+                    </li>
+                }
+            }
+        </ul>
+    }
+}

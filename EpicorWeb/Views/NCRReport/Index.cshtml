@@ -1,0 +1,303 @@
+﻿@using System.Data;
+@{
+    ViewData["Title"] = "Vinam Oil Tools";
+    Layout = "~/Views/Shared/_EmptyLayout.cshtml";
+    @model System.Data.DataTable
+}
+
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords"
+          content="wrappixel, admin dashboard, html css dashboard, web dashboard, bootstrap 5 admin, bootstrap 5, css3 dashboard, bootstrap 5 dashboard, Matrix lite admin bootstrap 5 dashboard, frontend, responsive bootstrap 5 admin template, Matrix admin lite design, Matrix admin lite dashboard bootstrap 5 dashboard template">
+    <meta name="description"
+          content="Matrix Admin Lite Free Version is powerful and clean admin dashboard template, inpired from Bootstrap Framework">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../../assets/images/favicon.png">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="../../assets/extra-libs/multicheck/multicheck.css">
+    <link href="../../assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="../../dist/css/style.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        /* Custom CSS to make datatable scrollable */
+
+        .card .card-title {
+            font-weight: bold;
+            margin-bottom: 0px;
+        }
+
+        .border-top {
+            padding: 10px; /* Thêm padding nếu cần */
+        }
+
+        #export-excel-button {
+            margin-right: 9em; /* Điều chỉnh khoảng cách bên phải nếu cần */
+            padding-right: 1em; /* Điều chỉnh padding bên phải nếu cần */
+        }
+
+        .card-body {
+            padding: 0.5rem;
+        }
+
+        .dataTables_filter input {
+            width: 17em !important; /* Adjust the width as needed */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin5" data-sidebartype="full"
+         data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full">
+        <div class="page-wrapper" style="margin-left:0px">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h3 class="card-title">Vinam NCR</h3>
+                                </div>
+                                <div class="card col-md-12">
+                                    <form action="~/ReportNCR/GetDataByDate" method="get">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label class="mt-3">From Date</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control datepicker-autoclose" id="fromDate" name="fromDate"
+                                                               placeholder="mm/dd/yyyy"  autocomplete="off">
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="mt-3">To Date</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control datepicker-autoclose" id="toDate" name="toDate"
+                                                               placeholder="mm/dd/yyyy"  autocomplete="off">
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 d-flex align-items-end">
+                                                    <button type="submit" class="btn btn-md btn-success text-white invoiceLoc me-2"
+                                                            id="export-button" name="export-button">
+                                                        Xuất Dữ Liệu
+                                                    </button>
+                                                    <button type="submit" class="btn btn-md btn-success text-white invoiceLoc"
+                                                            id="export-excel-button" name="export-excel-button">
+                                                        Xuất Excel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="input-group">
+                                                <p class="text-danger mt-3">
+                                                    @TempData["VinamPurchaseInvoiceListShow_Error"]
+                                                </p>
+                                            </div>
+                                    </form>
+                                </div>
+                                <div class="table-container">
+                                    <div class="table-responsive">
+                                        <table id="zero_config" class="table table-striped table-bordered">
+                                            <thead style="font-weight:bold !important">
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>SYS DATE</th>
+                                                    <th>DATE OPEN</th>
+                                                    <th>ACTION COMP</th>
+                                                    <th>DUDATE</th>
+                                                    <th>AUDIT DATE</th>
+                                                    <th>SITE</th>
+                                                    <th>INSPECTION PENDING</th>
+                                                    <th>TRAN ID</th>
+                                                    <th>EMPLOYEE</th>
+                                                    <th>NAME</th>
+                                                    <th>JOB NUMBER</th>
+                                                    <th>PART</th>
+                                                    <th>OPR</th>
+                                                    <th>OPERATION</th>
+                                                    <th>DESCRIPTION</th>
+                                                    <th>DMR NUMBER</th>
+                                                    <th>ACTION ID</th>
+                                                    <th>PASSED QTY</th>
+                                                    <th>SCRAP QTY</th>
+                                                    <th>COMMENT TEXT</th>
+                                                    <th>NCR-QUANTITY</th>
+                                                    <th>CAUSE REASON</th>
+                                                    <th>CORRECTIVE ACTION REASON</th>
+                                                    <th>ROOT CAUSE INVESTIGATION</th>
+                                                    <th>COMMENT TEXT</th>
+                                                    <th>AUDIT COMMENTS</th>
+                                                    <th>STATUS CODE</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="dataTables_scroll">
+                                                @foreach (DataRow row in Model.Rows)
+                                                {
+                                                    <tr>
+                                                        <td>@row["stt"]</td>
+                                                        <td>@string.Format("{0:dd/MM/yyyy}", Convert.ToDateTime(row["NonConf_SysDate"]))</td>
+                                                        <td>
+                                                            @{
+                                                                var dateValue = row["DMRCorAct_DateOpen"];
+                                                                var formattedDateOpen = dateValue != DBNull.Value ? string.Format("{0:dd/MM/yyyy}", Convert.ToDateTime(dateValue)) : "";
+                                                            }
+                                                            @formattedDateOpen
+                                                        </td>
+                                                        <td>
+                                                            @{
+                                                                var dateValue1 = row["DMRCorAct_ActionComp"];
+                                                                var formattedActionComp = dateValue1 != DBNull.Value ? string.Format("{0:dd/MM/yyyy}", Convert.ToDateTime(dateValue1)) : "";
+                                                            }
+                                                            @formattedActionComp
+                                                        </td>
+                                                        <td>
+                                                            @{
+                                                                var dateValue2 = row["DMRCorAct_DuDate"];
+                                                                var formattedDuDate = dateValue2 != DBNull.Value ? string.Format("{0:dd/MM/yyyy}", Convert.ToDateTime(dateValue2)) : "";
+                                                            }
+                                                            @formattedDuDate
+                                                        </td>
+                                                        <td>
+                                                            @{
+                                                                var dateValue3 = row["DMRCorAct_AuditDt"];
+                                                                var formattedAuditDt = dateValue3 != DBNull.Value ? string.Format("{0:dd/MM/yyyy}", Convert.ToDateTime(dateValue3)) : "";
+                                                            }
+                                                            @formattedAuditDt
+                                                        </td>
+                                                        <td>@row["JobHead_Plant"]</td>
+                                                        <td>@row["NonConf_InspectionPending"]</td>
+                                                        <td>@row["NonConf_TranID"]</td>
+                                                        <td>@row["NonConf_EmpID"]</td>
+                                                        <td>@row["EmpBasic_Name"]</td>
+                                                        <td>@row["NonConf_JobNum"]</td>
+                                                        <td>@row["NonConf_PartNum"]</td>
+                                                        <td>@row["NonConf_OprSeq"]</td>
+                                                        <td>@row["NonConf_OpCode"]</td>
+                                                        <td>@row["Reason_Description"]</td>
+                                                        <td>@row["NonConf_DMRNum"]</td>
+                                                        <td>@row["DMRCorAct_ActionID"]</td>
+                                                        <td>@row["NonConf_PassedQty"]</td>
+                                                        <td>@row["NonConf_FailedQty"]</td>
+                                                        <td>@row["NonConf_CommentText"]</td>
+                                                        <td>@row["NonConf_Quantity"]</td>
+                                                        <td>@row["DMRCorAct_CauseReasonCode"]</td>
+                                                        <td>@row["DMRCorAct_CorrectiveActionReasonCode"]</td>
+                                                        <td>@row["DMRCorAct_CauseInv"]</td>
+                                                        <td>@row["DMRCorAct_CommentText"]</td>
+                                                        <td>@row["DMRCorAct_AuditCmts"]</td>
+                                                        <td>@row["Calculated_StatusCode"]</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" type="text/css"
+          href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+    <link href="~/css/spinner.css" rel="stylesheet" />
+    <script src="../../assets/libs/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- slimscrollbar scrollbar JavaScript -->
+    <script src="../../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../../assets/extra-libs/sparkline/sparkline.js"></script>
+    <!--Wave Effects -->
+    <script src="../../dist/js/waves.js"></script>
+    <!--Menu sidebar -->
+    <script src="../../dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="../../dist/js/custom.min.js"></script>
+    <!-- this page js -->
+    <script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+    <script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+    <script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+    <script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.2.4/js/dataTables.fixedHeader.min.js"></script>
+    <script>
+        /****************************************
+         *       Basic Table                   *
+         ****************************************/
+        $('#zero_config').DataTable({
+            scrollY: '400px', // Chiều cao của phần cuộn dọc
+            scrollX: true, // Bật cuộn ngang
+            scrollCollapse: false, // Cho phép bảng bị thu gọn khi không đủ dữ liệu để cuộn
+            paging: false // Bỏ phân trang nếu không cần
+        });
+
+        /*datwpicker*/
+        jQuery('.datepicker-autoclose').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'bottom'
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#export-excel-button").click(function (e) {
+                e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+                // Vô hiệu hóa button
+                $(this).prop("disabled", true);
+
+                // Gửi dữ liệu bằng Ajax đến controller
+                $.ajax({
+                    url: "/ReportNCR/ExportExcel", // Đường dẫn đến action trong controller
+                    type: "POST",
+                    data: {
+                        // Bạn có thể thêm dữ liệu cần thiết ở đây
+                    },
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'VinamNCR.xlsx'; // Đặt tên file Excel
+                        link.style.display = 'none';
+
+                        document.body.appendChild(link);
+                        link.click();
+
+                        window.URL.revokeObjectURL(link.href);
+                        document.body.removeChild(link);
+
+                        // Kích hoạt lại button
+                        $("#export-excel-button").prop("disabled", false);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Lỗi: ", error);
+                        // Kích hoạt lại button
+                        $("#export-excel-button").prop("disabled", false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
