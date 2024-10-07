@@ -1,5 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Vinam Purchase Invoice List";
+    if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+    {
+        Layout = null;
+    }
+    else
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 

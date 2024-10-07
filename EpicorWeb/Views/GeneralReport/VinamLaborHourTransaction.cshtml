@@ -1,0 +1,406 @@
+﻿@* @model List<EpicorWeb.Models.VinamPartList> *@
+@{
+	ViewData["Title"] = "**Vinam Labor Hour Transaction";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper" style="background-color:#ffffff">
+	<div class="card">
+		<form action="~/GeneralReport/ExportVinamPartList" method="post" enctype="multipart/form-data">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-6">
+						<h4 class="card-title pb-4">**Vinam Part List</h4>
+					</div>
+					<div class="col-md-6 text-end">
+						@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
+						<div id="resultMessage" style="color: green;"></div>
+					</div>
+				</div>
+				<div class="border-top">
+					<div class="card-body">
+						<h3>
+							Vì dữ liệu của danh sách part list khá lớn nên chỉ hỗ trợ xuất excel.
+						</h3>
+					</div>
+					<div class="card-body">
+						<div class="card-body">
+							<h4 class="card-title">Lọc theo ngày</h4>
+							<label class="mt-3">From Date</label>
+							<div class="input-group">
+								<input type="text" class="form-control datepicker-autoclose" id="fromDate" name="fromDate"
+									   placeholder="mm/dd/yyyy" autocomplete="off">
+								<div class="input-group-append">
+									<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+							<label class="mt-3">To Date</label>
+							<div class="input-group">
+								<input type="text" class="form-control datepicker-autoclose" id="toDate" name="toDate"
+									   placeholder="mm/dd/yyyy" autocomplete="off">
+								<div class="input-group-append">
+									<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+						</div>
+						<div class="border-top">
+							<div class="card-body">
+								<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
+										id="export-button" name="export-button">
+									Xuất Excel
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				@* <div class="table-responsive">
+				<table id="zero_config" class="table table-striped table-bordered">
+				<thead>
+				<tr>
+				<th>Part Num</th>
+				<th>Part Description</th>
+				<th>Type Code</th>
+				<th>UOM Class ID</th>
+				<th>IUM</th>
+				<th>Sales UM</th>
+				<th>PUM</th>
+				<th>Unit Price</th>
+				<th>Prod Code</th>
+				<th>Class ID</th>
+				<th>Use Part Rev</th>
+				<th>Track Lots</th>
+				<th>Cost Method</th>
+				<th>Non Stock</th>
+				<th>Qty Bearing</th>
+				<th>Plant</th>
+				<th>Primary Warehouse</th>
+				<th>Plant Cost Method</th>
+				<th>Manufacturing Lot Size</th>
+				<th>Source Type</th>
+				<th>Plant Non Stock</th>
+				<th>Plant Qty Bearing</th>
+				<th>Generate Suggestions</th>
+				<th>Inactive</th>
+				<th>GL Control Type</th>
+				<th>GL Control Code</th>
+				<th>Tax Category ID</th>
+				<th>Minimum Qty</th>
+				<th>Maximum Qty</th>
+				<th>Safety Qty</th>
+				</tr>
+				</thead>
+				@if (Model != null && Model.Any())
+				{
+				<tbody>
+				@foreach (var inv in Model)
+				{
+				<tr>
+				<td>@Html.DisplayFor(modelItem => inv.Part_PartNum)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_PartDescription)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_TypeCode)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_UOMClassID)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_IUM)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_SalesUM)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_PUM)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_UnitPrice)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_ProdCode)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_ClassID)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_UsePartRev)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_TrackLots)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_CostMethod)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_NonStock)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_QtyBearing)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_Plant)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_PrimWhse)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_CostMethod)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_MfgLotSize)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_SourceType)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_NonStock)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_QtyBearing)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_GenerateSugg)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_InActive)</td>
+				<td>@Html.DisplayFor(modelItem => inv.EntityGLC_GLControlType)</td>
+				<td>@Html.DisplayFor(modelItem => inv.EntityGLC_GLControlCode)</td>
+				<td>@Html.DisplayFor(modelItem => inv.Part_TaxCatID)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_MinimumQty)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_MaximumQty)</td>
+				<td>@Html.DisplayFor(modelItem => inv.PartPlant_SafetyQty)</td>
+				</tr>
+				}
+				</tbody>
+				}
+				</table>
+				</div>*@
+
+			</div>
+		</form>
+	</div>
+</div>
+<div id="myModalContainer"></div>
+<link rel="stylesheet" type="text/css"
+	  href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+<link href="~/css/spinner.css" rel="stylesheet" />
+<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="../../dist/js/custom.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+		$("form").submit(function (e) {
+			e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+			var startDate = $("#fromDate").val();
+			var endDate = $("#toDate").val();
+
+			// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+			if (!startDate || !endDate) {
+				alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+				return; // Dừng xử lý nếu không chọn đủ hai ngày
+			}
+
+
+			// Hiển thị hiệu ứng chờ
+			$("#loading-spinner").show();
+			// Vô hiệu hóa button
+			$("#export-button").prop("disabled", true);
+
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/GeneralReport/ExportVinamLaborHourTransaction", // Đường dẫn đến action trong controller
+				type: "POST",
+				data: {
+					fromDate: startDate,
+					toDate: endDate
+				},
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (data) {
+					var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#export-button").prop("disabled", false);
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
+					link.download = 'VinamLaborHourTransaction.xlsx'; // Đặt tên file Excel
+					link.style.display = 'none';
+
+					document.body.appendChild(link);
+					link.click();
+
+					window.URL.revokeObjectURL(link.href);
+					document.body.removeChild(link);
+				}
+			});
+		});
+	});
+
+	/*datwpicker*/
+	jQuery('.datepicker-autoclose').datepicker({
+		autoclose: true,
+		todayHighlight: true,
+		orientation: 'bottom'
+	});
+
+	$('.btnEditUser').on('click', function () {
+		var id = $(this).data('id');
+		var name = $(this).data('name');
+		var groupname = $(this).data('groupname');
+		var groupid = $(this).data('groupid');
+
+		openEditGroupsModal(id, name, groupname, groupid);
+	});
+
+	function openEditGroupsModal(id, name, groupname, groupid) {
+		$.ajax({
+			url: '/UsersController/EditUsers',
+			type: 'GET',
+			data: { id: id, name: name, groupname: groupname, groupid: groupid },
+			success: function (modalHtml) {
+				$('#myModalContainer').html(modalHtml);
+				$('#editGroups').modal('show');
+			},
+			error: function () {
+				alert('Đã xảy ra lỗi khi gọi controller.');
+			}
+		});
+	}
+
+
+</script>
+@section css {
+	<link rel="stylesheet" type="text/css"
+		  href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/css/spinner.css" rel="stylesheet" />
+}
+
+@section script {
+	<!-- form js -->
+	<!-- this page js -->
+	<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+	<script src="../../dist/js/custom.min.js"></script>
+	<script>
+
+		var table = $('#zero_config').DataTable({
+			"language": {
+				"paginate": {
+					"previous": "<<", // Thay đổi nút Previous thành <<
+					"next": ">>"      // Thay đổi nút Next thành >>
+				}
+			},
+			// "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]] // Các tùy chọn page size
+		});
+		table.on('draw.dt', function () {
+			initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
+		});
+
+		// Sự kiện thay đổi page size
+		table.on('length.dt', function (e, settings, len) {
+			var currentPageSize = len;
+			var currentPage = table.page.info().page + 1; // Lấy trang hiện tại (bắt đầu từ 1)
+
+			// Gọi lại API với pageSize và currentPage
+			loadPageData(currentPage, currentPageSize);
+		});
+
+		// Sự kiện thay đổi page
+		table.on('page.dt', function () {
+			var currentPage = table.page.info().page + 1;
+			var currentPageSize = table.page.len();
+
+			// Gọi lại API với pageSize và currentPage
+			loadPageData(currentPage, currentPageSize);
+		});
+
+		// Hàm gọi API để load lại dữ liệu
+		function loadPageData(page, pageSize) {
+			$.ajax({
+				url: '/GeneralReport/VinamPartList', // Đường dẫn API
+				type: 'GET',
+				data: { page: page, pageSize: pageSize },
+				success: function (data) {
+					// Cập nhật lại bảng với dữ liệu mới
+					console.error(data);
+					table.clear().rows.add(data).draw();
+				},
+				error: function (err) {
+					console.error("Lỗi khi load dữ liệu: ", err);
+				}
+			});
+		}
+
+		// Định nghĩa hàm gắn sự kiện click cho nút "Sửa"
+		function initUpdateButtonEvent() {
+			$('.btnEditUser').off('click').on('click', function () {
+				var id = $(this).data('id');
+				var name = $(this).data('name');
+				var groupname = $(this).data('groupname');
+				var groupid = $(this).data('groupid');
+
+				openEditGroupsModal(id, name, groupname, groupid);
+			});
+		}
+
+	</script>
+	<script>
+		/*datwpicker*/
+		jQuery('.datepicker-autoclose').datepicker({
+			autoclose: true,
+			todayHighlight: true,
+			orientation: 'bottom'
+		});
+
+	</script>
+	<script>
+		$(document).ready(function () {
+			$("form").submit(function (e) {
+				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+				var startDate = $("#fromDate").val();
+				var endDate = $("#toDate").val();
+
+				// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+				if (!startDate || !endDate) {
+					alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+					return; // Dừng xử lý nếu không chọn đủ hai ngày
+				}
+
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/GeneralReport/ExportVinamLaborHourTransaction", // Đường dẫn đến action trong controller
+					type: "POST",
+					data: {
+						fromDate: startDate,
+						toDate: endDate
+					},
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'VinamLaborHourTransaction.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		$('.btnEditUser').on('click', function () {
+			var id = $(this).data('id');
+			var name = $(this).data('name');
+			var groupname = $(this).data('groupname');
+			var groupid = $(this).data('groupid');
+
+			openEditGroupsModal(id, name, groupname, groupid);
+		});
+
+		function openEditGroupsModal(id, name, groupname, groupid) {
+			$.ajax({
+				url: '/UsersController/EditUsers',
+				type: 'GET',
+				data: { id: id, name: name, groupname: groupname, groupid: groupid },
+				success: function (modalHtml) {
+					$('#myModalContainer').html(modalHtml);
+					$('#editGroups').modal('show');
+				},
+				error: function () {
+					alert('Đã xảy ra lỗi khi gọi controller.');
+				}
+			});
+		}
+
+	</script>
+}

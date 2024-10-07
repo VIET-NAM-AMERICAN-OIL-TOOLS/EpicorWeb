@@ -1,0 +1,35 @@
+﻿@model List<EpicorWeb.Models.Users>
+@{
+
+}
+<table id="zero_config" class="table table-striped table-bordered">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>Group ID</th>
+			<th>Name Group</th>
+			<th>#</th>
+		</tr>
+	</thead>
+	@if (Model != null && Model.Any())
+	{
+		<tbody>
+			@foreach (var inv in Model)
+			{
+				<tr>
+					<td>@Html.DisplayFor(modelItem => inv.ID)</td>
+					<td>@Html.DisplayFor(modelItem => inv.Name)</td>
+					<td>@Html.DisplayFor(modelItem => inv.GroupID)</td>
+					<td>@Html.DisplayFor(modelItem => inv.GroupName)</td>
+					<td>
+						<button type="button" class="btn btn-warning btn-lg text-white btnEditUser"
+								id="btnEditUser" data-id="@inv.ID" data-name="@inv.Name" data-groupname="@inv.GroupName" data-groupid="@inv.GroupID">
+							Sửa
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	}
+</table>

@@ -1,52 +1,57 @@
 ﻿@using System.Data;
 @using EpicorWeb.AllFunction;
 @{
-    ViewData["Title"] = "Vinam Category";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    @model System.Data.DataTable
+	ViewData["Title"] = "Vinam Category";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
+	@model System.Data.DataTable
 
 }
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin5" data-sidebartype="full"
-     data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full">
-    <div class="page-wrapper">
-        <div class="page-breadcrumb">
-            <div class="row">
-                <div class="col-md-6 d-flex align-items-center">
-                    <h4 class="page-title">Category</h4>
-                </div>
-                <div class="col-md-6 text-end d-flex justify-content-end align-items-center">
-                    <button type="button" class="btn btn-success btn-lg text-white mx-2" id="btnAddGroups">
-                        Thêm
-                    </button>
-                    <button type="button" class="btn btn-warning btn-lg text-white mx-2" id="btnEditGroups">
-                        Sửa
-                    </button>
-                    <button type="button" class="btn btn-danger btn-lg text-white mx-2" id="btnDeleteGroups">
-                        Xóa
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="form-group row">
-                                <div class="col-md-12 tree">
-                                    @{
-                                        RenderCheckBoxList(Model);
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- editor -->
-        </div>
-    </div>
+	 data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full">
+	<div class="page-wrapper">
+		<div class="page-breadcrumb">
+			<div class="row">
+				<div class="col-md-6 d-flex align-items-center">
+					<h4 class="page-title">Category</h4>
+				</div>
+				<div class="col-md-6 text-end d-flex justify-content-end align-items-center">
+					<button type="button" class="btn btn-success btn-lg text-white mx-2" id="btnAddGroups">
+						Thêm
+					</button>
+					<button type="button" class="btn btn-warning btn-lg text-white mx-2" id="btnEditGroups">
+						Sửa
+					</button>
+					<button type="button" class="btn btn-danger btn-lg text-white mx-2" id="btnDeleteGroups">
+						Xóa
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-body">
+							<div class="form-group row">
+								<div class="col-md-12 tree">
+									@{
+										RenderCheckBoxList(Model);
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- editor -->
+		</div>
+	</div>
 </div>
 <!-- Container để hiển thị modal trả về -->
 <div id="myModalContainer"></div>
@@ -55,226 +60,385 @@
 }
 
 @functions {
-    //đệ quy tạo treelist
-    void RenderCheckBoxList(DataTable data, List<int> renderedIDs = null, int level = 0)
-    {
-        // Khởi tạo danh sách renderedIDs nếu nó chưa được khởi tạo
-        renderedIDs ??= new List<int>();
+	//đệ quy tạo treelist
+	void RenderCheckBoxList(DataTable data, List<int> renderedIDs = null, int level = 0)
+	{
+		// Khởi tạo danh sách renderedIDs nếu nó chưa được khởi tạo
+		renderedIDs ??= new List<int>();
 
-            <ul class="checkbox-list" style="list-style-type:none">
-                @foreach (DataRow row in data.Rows)
-            {
-                // Kiểm tra xem ID của mục hiện tại đã được xuất ra chưa
-                if (!renderedIDs.Contains(int.Parse(row["ID"].ToString())))
-                {
-                    // Nếu chưa, thêm ID vào danh sách renderedIDs
-                    renderedIDs.Add(int.Parse(row["ID"].ToString()));
+		<ul class="checkbox-list" style="list-style-type:none">
+			@foreach (DataRow row in data.Rows)
+			{
+				// Kiểm tra xem ID của mục hiện tại đã được xuất ra chưa
+				if (!renderedIDs.Contains(int.Parse(row["ID"].ToString())))
+				{
+					// Nếu chưa, thêm ID vào danh sách renderedIDs
+					renderedIDs.Add(int.Parse(row["ID"].ToString()));
 
-                        <li>
-                            <span>
-                            @if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
-                            {
-                                 <i class="fa fa-minus-square"></i>
-                                 <input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px" onchange="checkChildren(this)">
-                                    
-                            }else
-                            {
-                                 <input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px">
-                            }
-                            <label for="@(row["ID"])">@row["Name"]</label>
-                            @if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
-                            {
-                                var children = new CategoryAdmin().GetChildren(int.Parse(row["ID"].ToString()));
-                                if (children.Rows.Count > 0)
-                                {
-                                    // Gọi đệ quy và chuyển renderedIDs cho hàm đệ quy
-                                    RenderCheckBoxList(children, renderedIDs, level + 1);
-                                }
-                            }
-                            </span>
-                        </li>
-                }
-            }
-            </ul>
-    }
+					<li>
+						<span>
+							@if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
+							{
+								<i class="fa fa-minus-square"></i>
+								<input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px" onchange="checkChildren(this)">
+
+							}
+							else
+							{
+								<input type="checkbox" id="@(row["ID"])" level="@(row["Level"])" style="margin-left:@(level * 1 + 10)px">
+							}
+							<label for="@(row["ID"])">@row["Name"]</label>
+							@if (new CategoryAdmin().HasChildren(int.Parse(row["ID"].ToString())))
+							{
+								var children = new CategoryAdmin().GetChildren(int.Parse(row["ID"].ToString()));
+								if (children.Rows.Count > 0)
+								{
+									// Gọi đệ quy và chuyển renderedIDs cho hàm đệ quy
+									RenderCheckBoxList(children, renderedIDs, level + 1);
+								}
+							}
+						</span>
+					</li>
+				}
+			}
+		</ul>
+	}
 }
 
-@section script{
-    <script src="../../dist/js/custom.min.js"></script>
+@section script {
+	<script src="../../dist/js/custom.min.js"></script>
 
 
 
-<script type="text/javascript">
-//show form partialview khi thêm
-    $(document).ready(function () {
-        $('#btnAddGroups').click(function () {
-            var selectedIDs = [];
-            var selectedLevels = [];
-            // Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
-            $('.checkbox-list input[type=checkbox]:checked').each(function () {
-                selectedIDs.push($(this).attr('id'));
-                selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
-            });
+	<script type="text/javascript">
+		//show form partialview khi thêm
+		$(document).ready(function () {
+			$('#btnAddGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
+				});
 
-            // Gửi danh sách các ID đã chọn đến controller bằng AJAX request
-            $.ajax({
-                url:'/CategoryAdminController/AddCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
-                type: 'GET',
-                traditional: true,
-                data: { selectedIDs: selectedIDs , selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
-                success: function (response) {
-                    if (response.success) {
-                        $('#myModalContainer').html(response.viewContent);
-                        $('#addGroups').modal('show');
-                    } else {
-                        alert('Thông báo lỗi: '+ response.message);
-                    }
-                },
-                // success: function (modalHtml) {
-                //     // Hiển thị modal trả về từ PartialView
-                //     $('#myModalContainer').html(modalHtml);
-                //     $('#addGroups').modal('show');
-                // },
-                error: function () {
-                    // Xử lý lỗi ở đây
-                    alert('Đã xảy ra lỗi khi gọi controller.');
-                }
-            });
-        });
-    });
-</script>
-
-
-<script type="text/javascript">
-//show form partialview khi sửa
-    $(document).ready(function () {
-        $('#btnEditGroups').click(function () {
-            var selectedIDs = [];
-            var selectedLevels = [];
-            // Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
-            $('.checkbox-list input[type=checkbox]:checked').each(function () {
-                selectedIDs.push($(this).attr('id'));
-                selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
-            });
-
-            // Gửi danh sách các ID đã chọn đến controller bằng AJAX request
-            $.ajax({
-                url:'/CategoryAdminController/EditCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
-                type: 'GET',
-                traditional: true,
-                data: { selectedIDs: selectedIDs , selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
-                success: function (response) {
-                    if (response.success) {
-                        $('#myModalContainer').html(response.viewContent);
-                        $('#addGroups').modal('show');
-                    } else {
-                        alert('Thông báo lỗi: '+ response.message);
-                    }
-                },
-                error: function () {
-                    // Xử lý lỗi ở đây
-                    alert('Đã xảy ra lỗi khi gọi controller.');
-                }
-            });
-        });
-    });
-</script>
-
-//phân nhánh menu
-<script>
-   document.addEventListener('DOMContentLoaded', function() {
-  var treeItems = document.querySelectorAll('.tree li:has(ul)');
-
-  treeItems.forEach(function(item) {
-    item.classList.add('parent_li');
-    var span = item.querySelector('span');
-    if (span) {
-      span.setAttribute('title', 'Collapse this branch');
-
-      var icon = span.querySelector('i'); // Lấy thẻ <i> bên trong thẻ <span>
-      if (icon) {
-        icon.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var children = item.querySelectorAll('ul > li');
-
-          var isVisible = false;
-          for (var i = 0; i < children.length; i++) {
-            if (children[i].style.display !== 'none') {
-              isVisible = true;
-              break;
-            }
-          }
-
-          if (isVisible) {
-            Array.prototype.forEach.call(children, function(child) {
-              child.style.display = 'none';
-            });
-            span.setAttribute('title', 'Expand this branch');
-            icon.classList.remove('fa-minus-square');
-            icon.classList.add('fa-plus-square');
-          } else {
-            Array.prototype.forEach.call(children, function(child) {
-              child.style.display = 'block';
-            });
-            span.setAttribute('title', 'Collapse this branch');
-            icon.classList.remove('fa-plus-square');
-            icon.classList.add('fa-minus-square');
-          }
-        });
-      }
-    }
-  });
-});
-</script>
+				// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+				$.ajax({
+					url: '/CategoryAdminController/AddCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+					type: 'GET',
+					traditional: true,
+					data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+					success: function (response) {
+						if (response.success) {
+							$('#myModalContainer').html(response.viewContent);
+							$('#addGroups').modal('show');
+						} else {
+							alert('Thông báo lỗi: ' + response.message);
+						}
+					},
+					// success: function (modalHtml) {
+					//     // Hiển thị modal trả về từ PartialView
+					//     $('#myModalContainer').html(modalHtml);
+					//     $('#addGroups').modal('show');
+					// },
+					error: function () {
+						// Xử lý lỗi ở đây
+						alert('Đã xảy ra lỗi khi gọi controller.');
+					}
+				});
+			});
+		});
+	</script>
 
 
-<script>
-// Check mục con khi check mục cha
-    function checkChildren(checkbox) {
-        var listItem = checkbox.closest('li');
-        var childrenCheckboxes = listItem.querySelectorAll('input[type="checkbox"]');
-        childrenCheckboxes.forEach(function(childCheckbox) {
-            childCheckbox.checked = checkbox.checked;
-        });
-    }
-</script>
+	<script type="text/javascript">
+		//show form partialview khi sửa
+		$(document).ready(function () {
+			$('#btnEditGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
+				});
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#btnDeleteGroups').click(function () {
-            var selectedIDs = [];
-            var selectedLevels = [];
-            // Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
-            $('.checkbox-list input[type=checkbox]:checked').each(function () {
-                selectedIDs.push($(this).attr('id'));
-                selectedLevels.push($(this).attr('level'));
-            });
-            var confirmation = confirm('Bạn có chắc chắn muốn xóa danh mục?');
-            if (confirmation) { 
-                // Gửi danh sách các ID đã chọn đến controller bằng AJAX request
-            $.ajax({
-                url: '/CategoryAdminController/DeleteCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
-                type: 'POST',
-                traditional: true,
-                data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
-                success: function (data) {
-                    // Xử lý kết quả nếu cần
-                    if (data.success) {
-                        // Xóa dòng tương ứng khỏi bảng sau khi xóa thành công
-                    alert('Thông báo: '+ data.message);
-                        // Reload lại trang
-                    window.location.reload();
-                    } else {
-                        alert('Thông báo: ' + data.message);
-                    }
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    // Xử lý lỗi nếu có
-                }
-            });
-            }
-        });
-    });
-</script>
-}
+				// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+				$.ajax({
+					url: '/CategoryAdminController/EditCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+					type: 'GET',
+					traditional: true,
+					data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+					success: function (response) {
+						if (response.success) {
+							$('#myModalContainer').html(response.viewContent);
+							$('#addGroups').modal('show');
+						} else {
+							alert('Thông báo lỗi: ' + response.message);
+						}
+					},
+					error: function () {
+						// Xử lý lỗi ở đây
+						alert('Đã xảy ra lỗi khi gọi controller.');
+					}
+				});
+			});
+		});
+	</script>
 
+	//phân nhánh menu
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var treeItems = document.querySelectorAll('.tree li:has(ul)');
+
+			treeItems.forEach(function (item) {
+				item.classList.add('parent_li');
+				var span = item.querySelector('span');
+				if (span) {
+					span.setAttribute('title', 'Collapse this branch');
+
+					var icon = span.querySelector('i'); // Lấy thẻ <i> bên trong thẻ <span>
+					if (icon) {
+						icon.addEventListener('click', function (e) {
+							e.stopPropagation();
+							var children = item.querySelectorAll('ul > li');
+
+							var isVisible = false;
+							for (var i = 0; i < children.length; i++) {
+								if (children[i].style.display !== 'none') {
+									isVisible = true;
+									break;
+								}
+							}
+
+							if (isVisible) {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'none';
+								});
+								span.setAttribute('title', 'Expand this branch');
+								icon.classList.remove('fa-minus-square');
+								icon.classList.add('fa-plus-square');
+							} else {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'block';
+								});
+								span.setAttribute('title', 'Collapse this branch');
+								icon.classList.remove('fa-plus-square');
+								icon.classList.add('fa-minus-square');
+							}
+						});
+					}
+				}
+			});
+		});
+	</script>
+
+
+	<script>
+		// Check mục con khi check mục cha
+		function checkChildren(checkbox) {
+			var listItem = checkbox.closest('li');
+			var childrenCheckboxes = listItem.querySelectorAll('input[type="checkbox"]');
+			childrenCheckboxes.forEach(function (childCheckbox) {
+				childCheckbox.checked = checkbox.checked;
+			});
+		}
+	</script>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('#btnDeleteGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));
+				});
+				var confirmation = confirm('Bạn có chắc chắn muốn xóa danh mục?');
+				if (confirmation) {
+					// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+					$.ajax({
+						url: '/CategoryAdminController/DeleteCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+						type: 'POST',
+						traditional: true,
+						data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+						success: function (data) {
+							// Xử lý kết quả nếu cần
+							if (data.success) {
+								// Xóa dòng tương ứng khỏi bảng sau khi xóa thành công
+								alert('Thông báo: ' + data.message);
+								// Reload lại trang
+								window.location.reload();
+							} else {
+								alert('Thông báo: ' + data.message);
+							}
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							// Xử lý lỗi nếu có
+						}
+					});
+				}
+			});
+		});
+	</script>
+	}
+	<script>
+		$(document).ready(function () {
+			$('#btnAddGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
+				});
+
+				// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+				$.ajax({
+					url: '/CategoryAdminController/AddCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+					type: 'GET',
+					traditional: true,
+					data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+					success: function (response) {
+						if (response.success) {
+							$('#myModalContainer').html(response.viewContent);
+							$('#addGroups').modal('show');
+						} else {
+							alert('Thông báo lỗi: ' + response.message);
+						}
+					},
+					// success: function (modalHtml) {
+					//     // Hiển thị modal trả về từ PartialView
+					//     $('#myModalContainer').html(modalHtml);
+					//     $('#addGroups').modal('show');
+					// },
+					error: function () {
+						// Xử lý lỗi ở đây
+						alert('Đã xảy ra lỗi khi gọi controller.');
+					}
+				});
+			});
+		});
+		//show form partialview khi sửa
+		$(document).ready(function () {
+			$('#btnEditGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));// Thu thập ID của checkbox được chọn
+				});
+
+				// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+				$.ajax({
+					url: '/CategoryAdminController/EditCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+					type: 'GET',
+					traditional: true,
+					data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+					success: function (response) {
+						if (response.success) {
+							$('#myModalContainer').html(response.viewContent);
+							$('#addGroups').modal('show');
+						} else {
+							alert('Thông báo lỗi: ' + response.message);
+						}
+					},
+					error: function () {
+						// Xử lý lỗi ở đây
+						alert('Đã xảy ra lỗi khi gọi controller.');
+					}
+				});
+			});
+		});
+		document.addEventListener('DOMContentLoaded', function () {
+			var treeItems = document.querySelectorAll('.tree li:has(ul)');
+
+			treeItems.forEach(function (item) {
+				item.classList.add('parent_li');
+				var span = item.querySelector('span');
+				if (span) {
+					span.setAttribute('title', 'Collapse this branch');
+
+					var icon = span.querySelector('i'); // Lấy thẻ <i> bên trong thẻ <span>
+					if (icon) {
+						icon.addEventListener('click', function (e) {
+							e.stopPropagation();
+							var children = item.querySelectorAll('ul > li');
+
+							var isVisible = false;
+							for (var i = 0; i < children.length; i++) {
+								if (children[i].style.display !== 'none') {
+									isVisible = true;
+									break;
+								}
+							}
+
+							if (isVisible) {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'none';
+								});
+								span.setAttribute('title', 'Expand this branch');
+								icon.classList.remove('fa-minus-square');
+								icon.classList.add('fa-plus-square');
+							} else {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'block';
+								});
+								span.setAttribute('title', 'Collapse this branch');
+								icon.classList.remove('fa-plus-square');
+								icon.classList.add('fa-minus-square');
+							}
+						});
+					}
+				}
+			});
+		});
+
+		// Check mục con khi check mục cha
+		function checkChildren(checkbox) {
+			var listItem = checkbox.closest('li');
+			var childrenCheckboxes = listItem.querySelectorAll('input[type="checkbox"]');
+			childrenCheckboxes.forEach(function (childCheckbox) {
+				childCheckbox.checked = checkbox.checked;
+			});
+		}
+
+		$(document).ready(function () {
+			$('#btnDeleteGroups').click(function () {
+				var selectedIDs = [];
+				var selectedLevels = [];
+				// Lặp qua tất cả các checkbox được chọn và thu thập ID của chúng
+				$('.checkbox-list input[type=checkbox]:checked').each(function () {
+					selectedIDs.push($(this).attr('id'));
+					selectedLevels.push($(this).attr('level'));
+				});
+				var confirmation = confirm('Bạn có chắc chắn muốn xóa danh mục?');
+				if (confirmation) {
+					// Gửi danh sách các ID đã chọn đến controller bằng AJAX request
+					$.ajax({
+						url: '/CategoryAdminController/DeleteCategory', // Thay đổi 'ControllerName' thành tên controller của bạn
+						type: 'POST',
+						traditional: true,
+						data: { selectedIDs: selectedIDs, selectedLevels: selectedLevels }, // Gửi danh sách các ID đã chọn
+						success: function (data) {
+							// Xử lý kết quả nếu cần
+							if (data.success) {
+								// Xóa dòng tương ứng khỏi bảng sau khi xóa thành công
+								alert('Thông báo: ' + data.message);
+								// Reload lại trang
+								window.location.reload();
+							} else {
+								alert('Thông báo: ' + data.message);
+							}
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							// Xử lý lỗi nếu có
+						}
+					});
+				}
+			});
+		});
+
+	</script>

@@ -1,0 +1,675 @@
+﻿@model List<EpicorWeb.Models.VinamJobTracker>
+
+@{
+	ViewData["Title"] = "**Vinam Job Tracker";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
+
+	int PageSize = 20; // Giá trị mặc định
+	int CurrentPage = 1; // Trang hiện tại
+	int totalItems = Model.Count; // Tổng số mục có trong Model
+	int totalPages = (int)Math.Ceiling((double)totalItems / PageSize); // Tổng số trang
+
+	var paginatedModel = Model.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+}
+
+<div class="page-wrapper" style="background-color:#ffffff">
+	<div class="card">
+		<form action="~/GeneralReport/ExportVinamPartList" method="post" enctype="multipart/form-data">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-6">
+						<h4 class="card-title pb-4">**Vinam Job Tracker</h4>
+					</div>
+					<div class="col-md-6 text-end">
+						@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
+						<div id="resultMessage" style="color: green;"></div>
+					</div>
+				</div>
+				<div class="border-top">
+					<div class="card-body">
+						<h4 class="card-title">Vinam Job Tracker</h4>
+						<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
+								id="export-button" name="export-button">
+							Xuất Excel
+						</button>
+					</div>
+				</div>
+				<div class="table-responsive">
+					<div class="row">
+						<div class="col-sm-6 col-md-3">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="show">Show</span>
+								</div>
+								<select id="pageSizeSelect" class="form-select" aria-label="Default select example" aria-describedby="show">
+									<option value="20" selected>20</option>
+									<option value="50">50</option>
+									<option value="100">100</option>
+									@* <option value="-1">All</option> *@
+								</select>
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="show">entries</span>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+						</div>
+						<div class="col-sm-6 col-md-6">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="basic-addon1">Search</span>
+								</div>
+								<input type="text" class="form-control" id="searchText" placeholder="Tìm kiếm" aria-label="Search" aria-describedby="basic-addon1">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<nav class="col-12" aria-label="Page navigation example" id="pagination">
+							<ul class="pagination">
+
+								@if (CurrentPage > 1)
+								{
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" tabindex="" onclick="changePage(@(CurrentPage - 1))">Previous</a>
+									</li>
+								}
+								else
+								{
+									<li class="page-item disabled">
+										<a class="page-link" href="#">Previous</a>
+									</li>
+								}
+
+								<!-- Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại -->
+								@if (CurrentPage > 6)
+								{
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(1)">1</a>
+									</li>
+									<li class="page-item disabled">
+										<a class="page-link" href="#">...</a>
+									</li>
+								}
+
+								<!-- Hiển thị 5 trang trước và 5 trang sau trang hiện tại -->
+								@for (int i = Math.Max(1, CurrentPage - 5); i <= Math.Min(totalPages, CurrentPage + 5); i++)
+								{
+									if (i == CurrentPage)
+									{
+										<li class="page-item active">
+											<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+										</li>
+									}
+									else
+									{
+										<li class="page-item">
+											<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+										</li>
+									}
+								}
+
+								<!-- Hiển thị trang cuối cùng nếu không nằm trong dãy gần trang hiện tại -->
+								@if (CurrentPage < totalPages - 5)
+								{
+									<li class="page-item disabled">
+										<a class="page-link" href="#">...</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@totalPages)">@totalPages</a>
+									</li>
+								}
+
+								<!-- Nút 'Next' -->
+								@if (CurrentPage < totalPages)
+								{
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@(CurrentPage + 1))">Next</a>
+									</li>
+								}
+								else
+								{
+									<li class="page-item disabled">
+										<a class="page-link" href="#">Next</a>
+									</li>
+								}
+							</ul>
+						</nav>
+					</div>
+					<table id="zero_config" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Job Num</th>
+								<th>Act Setup Hours</th>
+								<th>Opr Seq</th>
+								<th>Op Code</th>
+								<th>Op Desc</th>
+								<th>Sub Contract</th>
+								<th>Run Qty</th>
+								<th>Qty Completed</th>
+								<th>Est Set Hours</th>
+								<th>Op Complete</th>
+								<th>Start Date</th>
+								<th>Est Prod Hours</th>
+								<th>Due Date</th>
+								<th>Act Prod Hours</th>
+								<th>Act Lab Cost</th>
+								<th>Act Bur Cost</th>
+								<th>Est Set Hours Per Mch</th>
+								<th>Set Up Crew Size</th>
+								<th>Prod Crew Size</th>
+								<th>Prod Lab Rate</th>
+								<th>Setup Lab Rate</th>
+								<th>Qty Per</th>
+								<th>Prod Standard</th>
+								<th>Ops Per Part</th>
+								<th>FA Qty</th>
+								<th>Added Oper</th>
+								<th>Machines</th>
+								<th>FS Job Status</th>
+								<th>Instructions</th>
+								<th>Prod UOM</th>
+								<th>General Plan Info</th>
+								<th>Est Std Description</th>
+								<th>JDF Op Completed</th>
+								<th>Removed from Plan</th>
+								<th>Est Std Type</th>
+								<th>External MES</th>
+								<th>Pct Reg</th>
+								<th>Setup Material</th>
+								<th>Material Color Rating</th>
+								<th>Misc Info 1</th>
+								<th>Misc Info 2</th>
+								<th>Setup URL</th>
+								<th>Exp Pct Up</th>
+								<th>Exp Cyc Tm</th>
+								<th>Exp Good</th>
+								<th>Non Prod Limit</th>
+								<th>Auto Spc Enable</th>
+								<th>Auto Spc Period</th>
+								<th>Part Qual Enable</th>
+								<th>Auto Spc Subgroup</th>
+								<th>Mobile Operation</th>
+								<th>ReWork</th>
+								<th>Request Move</th>
+								<th>Booked Unit Cost</th>
+								<th>User Map Data</th>
+								<th>Rough Cut Sched</th>
+								<th>Sched Comment</th>
+								<th>Contract ID</th>
+								<th>Printer ID</th>
+								<th>Last Printed Date</th>
+								<th>Last PC ID Printed</th>
+								<th>Current Pkg Code</th>
+								<th>External MES Sync Required</th>
+								<th>External MES Last Sync</th>
+								<th>Qty Per Cycle</th>
+								<th>Weight</th>
+								<th>Weight UOM</th>
+								<th>Tear Dwn End Date</th>
+								<th>Tear Dwn End Hour</th>
+								<th>Send Ahead Type</th>
+								<th>WI Tear Dwn End Date</th>
+								<th>Send Ahead Offset</th>
+								<th>WI Tear Dwn End Hour</th>
+								<th>Use All Roles</th>
+								<th>Asset Part Num</th>
+								<th>Serial Number</th>
+								<th>SN Required Opr</th>
+								<th>SN Required Sub Con Ship</th>
+								<th>Part Price Per Code</th>
+								<th>Part Sales UM</th>
+								<th>Part Selling Factor</th>
+							</tr>
+						</thead>
+						@if (paginatedModel != null && paginatedModel.Any())
+						{
+							<tbody id="data-body">
+								@foreach (var inv in paginatedModel)
+								{
+									<tr>
+										<td>@Html.DisplayFor(modelItem => inv.JobNum)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ActSetupHours)</td>
+										<td>@Html.DisplayFor(modelItem => inv.OprSeq)</td>
+										<td>@Html.DisplayFor(modelItem => inv.OpCode)</td>
+										<td>@Html.DisplayFor(modelItem => inv.OpDesc)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SubContract)</td>
+										<td>@Html.DisplayFor(modelItem => inv.RunQty)</td>
+										<td>@Html.DisplayFor(modelItem => inv.QtyCompleted)</td>
+										<td>@Html.DisplayFor(modelItem => inv.EstSetHours)</td>
+										<td>@Html.DisplayFor(modelItem => inv.OpComplete)</td>
+										<td>@Html.DisplayFor(modelItem => inv.StartDate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.EstProdHours)</td>
+										<td>@Html.DisplayFor(modelItem => inv.DueDate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ActProdHours)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ActLabCost)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ActBurCost)</td>
+										<td>@Html.DisplayFor(modelItem => inv.EstSetHoursPerMch)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SetUpCrewSize)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ProdCrewSize)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ProdLabRate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SetupLabRate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.QtyPer)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ProdStandard)</td>
+										<td>@Html.DisplayFor(modelItem => inv.OpsPerPart)</td>
+										<td>@Html.DisplayFor(modelItem => inv.FAQty)</td>
+										<td>@Html.DisplayFor(modelItem => inv.AddedOper)</td>
+										<td>@Html.DisplayFor(modelItem => inv.Machines)</td>
+										<td>@Html.DisplayFor(modelItem => inv.FSJobStatus)</td>
+										<td>@Html.DisplayFor(modelItem => inv.Instructions)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ProdUOM)</td>
+										<td>@Html.DisplayFor(modelItem => inv.GeneralPlanInfo)</td>
+										<td>@Html.DisplayFor(modelItem => inv.EstStdDescription)</td>
+										<td>@Html.DisplayFor(modelItem => inv.JDFOpCompleted)</td>
+										<td>@Html.DisplayFor(modelItem => inv.RemovedfromPlan)</td>
+										<td>@Html.DisplayFor(modelItem => inv.EstStdType)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExternalMES)</td>
+										<td>@Html.DisplayFor(modelItem => inv.PctReg)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SetupMaterial)</td>
+										<td>@Html.DisplayFor(modelItem => inv.MaterialColorRating)</td>
+										<td>@Html.DisplayFor(modelItem => inv.MiscInfo1)</td>
+										<td>@Html.DisplayFor(modelItem => inv.MiscInfo2)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SetupURL)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExpPctUp)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExpCycTm)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExpGood)</td>
+										<td>@Html.DisplayFor(modelItem => inv.NonProdLimit)</td>
+										<td>@Html.DisplayFor(modelItem => inv.AutoSpcEnable)</td>
+										<td>@Html.DisplayFor(modelItem => inv.AutoSpcPeriod)</td>
+										<td>@Html.DisplayFor(modelItem => inv.PartQualEnable)</td>
+										<td>@Html.DisplayFor(modelItem => inv.AutoSpcSubgroup)</td>
+										<td>@Html.DisplayFor(modelItem => inv.MobileOperation)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ReWork)</td>
+										<td>@Html.DisplayFor(modelItem => inv.RequestMove)</td>
+										<td>@Html.DisplayFor(modelItem => inv.BookedUnitCost)</td>
+										<td>@Html.DisplayFor(modelItem => inv.UserMapData)</td>
+										<td>@Html.DisplayFor(modelItem => inv.RoughCutSched)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SchedComment)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ContractID)</td>
+										<td>@Html.DisplayFor(modelItem => inv.PrinterID)</td>
+										<td>@Html.DisplayFor(modelItem => inv.LastPrintedDate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.LastPCIDPrinted)</td>
+										<td>@Html.DisplayFor(modelItem => inv.CurrentPkgCode)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExternalMESSyncRequired)</td>
+										<td>@Html.DisplayFor(modelItem => inv.ExternalMESLastSync)</td>
+										<td>@Html.DisplayFor(modelItem => inv.QtyPerCycle)</td>
+										<td>@Html.DisplayFor(modelItem => inv.Weight)</td>
+										<td>@Html.DisplayFor(modelItem => inv.WeightUOM)</td>
+										<td>@Html.DisplayFor(modelItem => inv.TearDwnEndDate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.TearDwnEndHour)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SendAheadType)</td>
+										<td>@Html.DisplayFor(modelItem => inv.WITearDwnEndDate)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SendAheadOffset)</td>
+										<td>@Html.DisplayFor(modelItem => inv.WITearDwnEndHour)</td>
+										<td>@Html.DisplayFor(modelItem => inv.UseAllRoles)</td>
+										<td>@Html.DisplayFor(modelItem => inv.AssetPartNum)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SerialNumber)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SNRequiredOpr)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SNRequiredSubConShip)</td>
+										<td>@Html.DisplayFor(modelItem => inv.PricePerCode)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SalesUM)</td>
+										<td>@Html.DisplayFor(modelItem => inv.SellingFactor)</td>
+									</tr>
+								}
+							</tbody>
+						}
+						else
+						{
+							<tr>
+								<td colspan="14">No records found.</td>
+							</tr>
+						}
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<div id="myModalContainer"></div>
+<script>
+
+	// Chuyển dữ liệu từ server vào biến JavaScript
+	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+	let currentPage = @CurrentPage;
+	let pageSize = @PageSize;
+	let textSearch = "";
+	document.addEventListener('DOMContentLoaded', function () {
+		// Chặn phím Enter cho form có id là 'export-form'
+		const form = document.getElementById('export-form');
+		form.addEventListener('keydown', function (event) {
+			if (event.key === 'Enter') {
+				event.preventDefault(); // Ngăn chặn hành động mặc định
+			}
+		});
+	});
+	function filterData(data, searchText) {
+		return data.filter(item => {
+			const JobNum = (item.JobNum || "").toLowerCase().includes(searchText.toLowerCase());
+			const OpDesc = (item.OpDesc || "").toLowerCase().includes(searchText.toLowerCase());
+			const StartDate = (item.StartDate || "").toLowerCase().includes(searchText.toLowerCase());
+			const DueDate = (item.DueDate || "").toLowerCase().includes(searchText.toLowerCase());
+			const OpCode = (item.OpCode || "").toLowerCase().includes(searchText.toLowerCase());
+			// Nếu một trong các cột có chứa giá trị tìm kiếm, trả về true
+			return JobNum || OpDesc || StartDate || DueDate || OpCode ;
+		});
+	}
+
+	function renderTable(pageSize, currentPage) {
+		const tableBody = document.getElementById('data-body');
+		tableBody.innerHTML = ''; // Xóa nội dung hiện tại
+		const filteredData = filterData(data, textSearch);
+		const paginatedItems = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+
+		paginatedItems.forEach(item => {
+			tableBody.innerHTML += `
+						<tr>
+			<td>${item.JobNum || ''}</td>
+			<td>${item.ActSetupHours || ''}</td>
+			<td>${item.OprSeq || ''}</td>
+			<td>${item.OpCode || ''}</td>
+			<td>${item.OpDesc || ''}</td>
+			<td>${item.SubContract || ''}</td>
+			<td>${item.RunQty || ''}</td>
+			<td>${item.QtyCompleted || ''}</td>
+			<td>${item.EstSetHours || ''}</td>
+			<td>${item.OpComplete || ''}</td>
+			<td>${item.StartDate || ''}</td>
+			<td>${item.EstProdHours || ''}</td>
+			<td>${item.DueDate || ''}</td>
+			<td>${item.ActProdHours || ''}</td>
+			<td>${item.ActLabCost || ''}</td>
+			<td>${item.ActBurCost || ''}</td>
+			<td>${item.EstSetHoursPerMch || ''}</td>
+			<td>${item.SetUpCrewSize || ''}</td>
+			<td>${item.ProdCrewSize || ''}</td>
+			<td>${item.ProdLabRate || ''}</td>
+			<td>${item.SetupLabRate || ''}</td>
+			<td>${item.QtyPer || ''}</td>
+			<td>${item.ProdStandard || ''}</td>
+			<td>${item.OpsPerPart || ''}</td>
+			<td>${item.FAQty || ''}</td>
+			<td>${item.AddedOper || ''}</td>
+			<td>${item.Machines || ''}</td>
+			<td>${item.FSJobStatus || ''}</td>
+			<td>${item.Instructions || ''}</td>
+			<td>${item.ProdUOM || ''}</td>
+			<td>${item.GeneralPlanInfo || ''}</td>
+			<td>${item.EstStdDescription || ''}</td>
+			<td>${item.JDFOpCompleted || ''}</td>
+			<td>${item.RemovedfromPlan || ''}</td>
+			<td>${item.EstStdType || ''}</td>
+			<td>${item.ExternalMES || ''}</td>
+			<td>${item.PctReg || ''}</td>
+			<td>${item.SetupMaterial || ''}</td>
+			<td>${item.MaterialColorRating || ''}</td>
+			<td>${item.MiscInfo1 || ''}</td>
+			<td>${item.MiscInfo2 || ''}</td>
+			<td>${item.SetupURL || ''}</td>
+			<td>${item.ExpPctUp || ''}</td>
+			<td>${item.ExpCycTm || ''}</td>
+			<td>${item.ExpGood || ''}</td>
+			<td>${item.NonProdLimit || ''}</td>
+			<td>${item.AutoSpcEnable || ''}</td>
+			<td>${item.AutoSpcPeriod || ''}</td>
+			<td>${item.PartQualEnable || ''}</td>
+			<td>${item.AutoSpcSubgroup || ''}</td>
+			<td>${item.MobileOperation || ''}</td>
+			<td>${item.ReWork || ''}</td>
+			<td>${item.RequestMove || ''}</td>
+			<td>${item.BookedUnitCost || ''}</td>
+			<td>${item.UserMapData || ''}</td>
+			<td>${item.RoughCutSched || ''}</td>
+			<td>${item.SchedComment || ''}</td>
+			<td>${item.ContractID || ''}</td>
+			<td>${item.PrinterID || ''}</td>
+			<td>${item.LastPrintedDate || ''}</td>
+			<td>${item.LastPCIDPrinted || ''}</td>
+			<td>${item.CurrentPkgCode || ''}</td>
+			<td>${item.ExternalMESSyncRequired || ''}</td>
+			<td>${item.ExternalMESLastSync || ''}</td>
+			<td>${item.QtyPerCycle || ''}</td>
+			<td>${item.Weight || ''}</td>
+			<td>${item.WeightUOM || ''}</td>
+			<td>${item.TearDwnEndDate || ''}</td>
+			<td>${item.TearDwnEndHour || ''}</td>
+			<td>${item.SendAheadType || ''}</td>
+			<td>${item.WITearDwnEndDate || ''}</td>
+			<td>${item.SendAheadOffset || ''}</td>
+			<td>${item.WITearDwnEndHour || ''}</td>
+			<td>${item.UseAllRoles || ''}</td>
+			<td>${item.AssetPartNum || ''}</td>
+			<td>${item.SerialNumber || ''}</td>
+			<td>${item.SNRequiredOpr || ''}</td>
+			<td>${item.SNRequiredSubConShip || ''}</td>
+			<td>${item.PartPricePerCode || ''}</td>
+			<td>${item.PartSalesUM || ''}</td>
+			<td>${item.PartSellingFactor || ''}</td>
+		</tr>
+						`;
+		});
+	}
+
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+	function setActivePage(page) {
+		currentPage = page; // Cập nhật trang hiện tại
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	}
+	let debounceTimeout;
+
+	document.getElementById('searchText').addEventListener('input', function () {
+		clearTimeout(debounceTimeout);
+		textSearch = this.value;
+		debounceTimeout = setTimeout(() => {
+			currentPage = 1;
+			renderTable(pageSize, currentPage);
+			renderPagging(pageSize, currentPage);
+		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+	});
+
+	// Cập nhật giá trị pageSize khi thay đổi
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			console.log(currentPage);
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
+	});
+	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
+	renderTable(pageSize, currentPage);
+
+	function renderPagging(pageSize, currentPage) {
+
+		const filteredData = filterData(data, textSearch);
+		const totalItems = filteredData.length;
+		const totalPages = Math.ceil(totalItems / pageSize);
+
+		const paginationElement = document.getElementById('pagination');
+		paginationElement.innerHTML = ''; // Xóa nội dung hiện tại
+
+		// Dọn dẹp nội dung cũ
+		paginationElement.innerHTML = '';
+
+		// Tạo danh sách phân trang
+		const ul = document.createElement('ul');
+		ul.className = 'pagination';
+
+		// Nút 'Previous'
+		const previousLi = document.createElement('li');
+		previousLi.className = currentPage > 1 ? 'page-item' : 'page-item disabled';
+		const previousLink = document.createElement('a');
+		previousLink.className = 'page-link';
+		previousLink.href = 'javascript:void(0)';
+		previousLink.textContent = 'Previous';
+		previousLink.onclick = currentPage > 1 ? () => setActivePage(currentPage - 1) : null;
+		previousLi.appendChild(previousLink);
+		ul.appendChild(previousLi);
+
+		// Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại
+		if (currentPage > 6) {
+			const firstLi = document.createElement('li');
+			firstLi.className = 'page-item';
+			const firstLink = document.createElement('a');
+			firstLink.className = 'page-link';
+			firstLink.href = 'javascript:void(0)';
+			firstLink.onclick = () => setActivePage(1);
+			firstLink.textContent = '1';
+			firstLi.appendChild(firstLink);
+			ul.appendChild(firstLi);
+
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+		}
+
+		// Hiển thị 5 trang trước và 5 trang sau trang hiện tại
+		for (let i = Math.max(1, currentPage - 5); i <= Math.min(totalPages, currentPage + 5); i++) {
+			const pageLi = document.createElement('li');
+			pageLi.className = i === currentPage ? 'page-item active' : 'page-item';
+			const pageLink = document.createElement('a');
+			pageLink.className = 'page-link';
+			pageLink.href = 'javascript:void(0)';
+			pageLink.onclick = () => setActivePage(i);
+			pageLink.textContent = i.toString();
+			pageLi.appendChild(pageLink);
+			ul.appendChild(pageLi);
+		}
+
+		if (currentPage < totalPages - 5) {
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+
+			const lastLi = document.createElement('li');
+			lastLi.className = 'page-item';
+			const lastLink = document.createElement('a');
+			lastLink.className = 'page-link';
+			lastLink.href = 'javascript:void(0)';
+			lastLink.onclick = () => setActivePage(totalPages);
+			lastLink.textContent = totalPages.toString();
+			lastLi.appendChild(lastLink);
+			ul.appendChild(lastLi);
+		}
+
+		const nextLi = document.createElement('li');
+		nextLi.className = currentPage < totalPages ? 'page-item' : 'page-item disabled';
+		const nextLink = document.createElement('a');
+		nextLink.className = 'page-link';
+		nextLink.href = 'javascript:void(0)';
+		nextLink.textContent = 'Next';
+		nextLink.onclick = currentPage < totalPages ? () => setActivePage(currentPage + 1) : null;
+		nextLi.appendChild(nextLink);
+		ul.appendChild(nextLi);
+
+		paginationElement.appendChild(ul);
+	}
+
+</script>
+
+@section css {
+	<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
+	<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
+}
+
+
+@section script {
+	<!-- form js -->
+	<!-- this page js -->
+	<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+	<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+	<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+	<link href="~/css/spinner.css" rel="stylesheet" />
+	<script src="../../dist/js/custom.min.js"></script>
+
+	<script>
+
+		var table = $('#zero_config').DataTable({
+			paging: false, // Enable paging
+			searching: false, // Disable search
+			lengthChange: true, // Disable length change
+			ordering: true, // Disable automatic ordering
+			responsive: true,
+			language: {
+				info: "",
+			}
+		});
+
+
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$("form").submit(function (e) {
+				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/GeneralReport/ExportVinamJobTracker", // Đường dẫn đến action trong controller
+					type: "POST",
+					// data: {
+					// 	fromDate: startDate,
+					// 	toDate: endDate
+					// },
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'ExportVinamJobTracker.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Chặn phím Enter cho form có id là 'export-form'
+			const form = document.getElementById('export-form');
+			form.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter') {
+					event.preventDefault(); // Ngăn chặn hành động mặc định
+				}
+			});
+		});
+	</script>
+}

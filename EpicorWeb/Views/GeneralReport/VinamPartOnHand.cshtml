@@ -1,0 +1,542 @@
+﻿@model List<EpicorWeb.Models.VinamPartOnHandQuantity>
+
+@{
+	ViewData["Title"] = "**Vinam Part On Hand";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
+
+	int PageSize = 20; // Giá trị mặc định
+	int CurrentPage = 1; // Trang hiện tại
+	int totalItems = Model.Count; // Tổng số mục có trong Model
+	int totalPages = (int)Math.Ceiling((double)totalItems / PageSize); // Tổng số trang
+
+	var paginatedModel = Model.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+}
+
+<div class="page-wrapper" style="background-color:#ffffff">
+	<div class="card">
+		<form action="~/GeneralReport/ExportVinamPartList" method="post" enctype="multipart/form-data">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-6">
+						<h4 class="card-title pb-4">**Vinam Part On Hand</h4>
+					</div>
+					<div class="col-md-6 text-end">
+						@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
+						<div id="resultMessage" style="color: green;"></div>
+					</div>
+				</div>
+				<div class="border-top">
+					<div class="card-body">
+								<h4 class="card-title">Quantity on hand</h4>
+								<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
+										id="export-button" name="export-button">
+									Xuất Excel
+								</button>
+							</div>
+				</div>
+				<div class="table-responsive">
+					<div class="row">
+						<div class="col-sm-6 col-md-3">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="show">Show</span>
+								</div>
+								<select id="pageSizeSelect" class="form-select" aria-label="Default select example" aria-describedby="show">
+									<option value="20" selected>20</option>
+									<option value="50">50</option>
+									<option value="100">100</option>
+									@* <option value="-1">All</option> *@
+								</select>
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="show">entries</span>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+						</div>
+						<div class="col-sm-6 col-md-6">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="basic-addon1">Search</span>
+								</div>
+								<input type="text" class="form-control" id="searchText" placeholder="Tìm kiếm" aria-label="Search" aria-describedby="basic-addon1">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<nav class="col-12" aria-label="Page navigation example" id="pagination">
+							<ul class="pagination">
+
+								@if (CurrentPage > 1)
+								{
+															<li class="page-item">
+																<a class="page-link" href="javascript:void(0)" tabindex="" onclick="changePage(@(CurrentPage - 1))">Previous</a>
+															</li>
+								}
+								else
+								{
+															<li class="page-item disabled">
+																<a class="page-link" href="#">Previous</a>
+															</li>
+								}
+
+								<!-- Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại -->
+								@if (CurrentPage > 6)
+								{
+															<li class="page-item">
+																<a class="page-link" href="javascript:void(0)" onclick="setActivePage(1)">1</a>
+															</li>
+															<li class="page-item disabled">
+																<a class="page-link" href="#">...</a>
+															</li>
+								}
+
+								<!-- Hiển thị 5 trang trước và 5 trang sau trang hiện tại -->
+								@for (int i = Math.Max(1, CurrentPage - 5); i <= Math.Min(totalPages, CurrentPage + 5); i++)
+								{
+									if (i == CurrentPage)
+									{
+																						<li class="page-item active">
+																							<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i)  onclick="setActivePage(@i)">@i</a>
+																						</li>
+									}
+									else
+									{
+																						<li class="page-item">
+																							<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+																						</li>
+									}
+								}
+
+								<!-- Hiển thị trang cuối cùng nếu không nằm trong dãy gần trang hiện tại -->
+								@if (CurrentPage < totalPages - 5)
+								{
+															<li class="page-item disabled">
+																<a class="page-link" href="#">...</a>
+															</li>
+															<li class="page-item">
+																<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@totalPages)">@totalPages</a>
+															</li>
+								}
+
+								<!-- Nút 'Next' -->
+								@if (CurrentPage < totalPages)
+								{
+															<li class="page-item">
+																<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@(CurrentPage + 1))">Next</a>
+															</li>
+								}
+								else
+								{
+															<li class="page-item disabled">
+																<a class="page-link" href="#">Next</a>
+															</li>
+								}
+							</ul>
+						</nav>
+					</div>
+					<table id="zero_config" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Part Num</th>
+								<th>Part Description</th>
+								<th>Warehouse Code</th>
+								<th>Bin Num</th>
+								<th>Onhand Qty</th>
+								<th>Lot Num</th>
+								<th>Mfg Batch</th>
+								<th>Mfg Lot</th>
+								<th>Heat Num</th>
+								<th>Firmware</th>
+								<th>Best Before Date</th>
+								<th>Mfg Date</th>
+								<th>Cure Date</th>
+								<th>Expire Date</th>
+								<th>Batch</th>
+								<th>Import Num</th>
+								<th>Imported From</th>
+								<th>Imported From Desc</th>
+								<th>Dim Code</th>
+								<th>Allocated Qty</th>
+								<th>Sales Allocated Qty</th>
+								<th>Sales Picking Qty</th>
+								<th>Sales Picked Qty</th>
+								<th>Job Allocated Qty</th>
+								<th>Job Picking Qty</th>
+								<th>Job Picked Qty</th>
+								<th>Transfer Order Allocated Qty</th>
+								<th>Transfer Order Picking Qty</th>
+								<th>Transfer Order Picked Qty</th>
+								<th>Shipping Qty</th>
+								<th>Packed Qty</th>
+								<th>PCID</th>
+								<th>Sync to FSA</th>
+							</tr>
+						</thead>
+						@if (paginatedModel != null && paginatedModel.Any())
+						{
+						<tbody id="data-body">
+								@foreach (var inv in paginatedModel)
+								{
+								<tr>
+									<td>@Html.DisplayFor(modelItem => inv.PartNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PartDescription)</td>
+									<td>@Html.DisplayFor(modelItem => inv.WarehouseCode)</td>
+									<td>@Html.DisplayFor(modelItem => inv.BinNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.OnhandQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.LotNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.MfgBatch)</td>
+									<td>@Html.DisplayFor(modelItem => inv.MfgLot)</td>
+									<td>@Html.DisplayFor(modelItem => inv.HeatNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.FirmWare)</td>
+									<td>@Html.DisplayFor(modelItem => inv.BestBeforeDt)</td>
+									<td>@Html.DisplayFor(modelItem => inv.MfgDt)</td>
+									<td>@Html.DisplayFor(modelItem => inv.CureDt)</td>
+									<td>@Html.DisplayFor(modelItem => inv.ExpireDt)</td>
+									<td>@Html.DisplayFor(modelItem => inv.Batch)</td>
+									<td>@Html.DisplayFor(modelItem => inv.ImportNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.ImportedFrom)</td>
+									<td>@Html.DisplayFor(modelItem => inv.ImportedFromDesc)</td>
+									<td>@Html.DisplayFor(modelItem => inv.DimCode)</td>
+									<td>@Html.DisplayFor(modelItem => inv.AllocatedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.SalesAllocatedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.SalesPickingQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.SalesPickedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.JobAllocatedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.JobPickingQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.JobPickedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.TFOrdAllocatedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.TFOrdPickingQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.TFOrdPickedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.ShippingQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PackedQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PCID)</td>
+									<td>@Html.DisplayFor(modelItem => inv.SendToFSA)</td>
+								</tr>
+								}
+						</tbody>
+						}
+						else
+						{
+							<tr>
+								<td colspan="13">No records found.</td>
+							</tr>
+						}
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<div id="myModalContainer"></div>
+<script  type="text/javascript">
+
+	// Chuyển dữ liệu từ server vào biến JavaScript
+	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+	let currentPage = @CurrentPage;
+	let pageSize = @PageSize;
+	let textSearch = "";
+	function removeAccents(str)
+	{
+			return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	}
+	 document.addEventListener('DOMContentLoaded', function () {
+        // Chặn phím Enter cho form có id là 'export-form'
+        const form = document.getElementById('export-form');
+        form.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn chặn hành động mặc định
+            }
+        });
+    });
+	function filterData(data, searchText) {
+		return data.filter(item => {
+			const PartNum = (item.PartNum || "").toLowerCase().includes(searchText.toLowerCase());
+			const PartDescription = (item.PartDescription || "").toLowerCase().includes(searchText.toLowerCase());
+			const WarehouseCode = (item.WarehouseCode || "").toLowerCase().includes(searchText.toLowerCase());
+			const BinNum = (item.BinNum || "").toLowerCase().includes(searchText.toLowerCase());
+			const LotNum = (item.LotNum || "").toLowerCase().includes(searchText.toLowerCase());
+			const MfgBatch = (item.MfgBatch || "").toLowerCase().includes(searchText.toLowerCase());
+			const MfgLot = (item.MfgLot || "").toLowerCase().includes(searchText.toLowerCase());
+			const HeatNum = (item.HeatNum || "").toLowerCase().includes(searchText.toLowerCase());
+			const Batch = (item.Batch || "").toLowerCase().includes(searchText.toLowerCase()); 
+			// Nếu một trong các cột có chứa giá trị tìm kiếm, trả về true
+			return PartNum || PartDescription || WarehouseCode || BinNum || LotNum || MfgBatch || MfgLot || HeatNum || Batch;
+		});
+	}
+
+	function renderTable(pageSize, currentPage) {
+		const tableBody = document.getElementById('data-body');
+		tableBody.innerHTML = ''; // Xóa nội dung hiện tại
+		const filteredData = filterData(data, textSearch);
+		const paginatedItems = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+
+		paginatedItems.forEach(item => {
+			tableBody.innerHTML += `
+				<tr>
+					<td>${item.PartNum || ''}</td>
+					<td>${item.PartDescription || ''}</td>
+					<td>${item.WarehouseCode || ''}</td>
+					<td>${item.BinNum || ''}</td>
+					<td>${item.OnhandQty || ''}</td>
+					<td>${item.LotNum || ''}</td>
+					<td>${item.MfgBatch || ''}</td>
+					<td>${item.MfgLot || ''}</td>
+					<td>${item.HeatNum || ''}</td>
+					<td>${item.FirmWare || ''}</td>
+					<td>${item.BestBeforeDt || '' || ''}</td>
+					<td>${item.MfgDt || '' || ''}</td>
+					<td>${item.CureDt || ''}</td>
+					<td>${item.ExpireDt || ''}</td>
+					<td>${item.Batch || ''}</td>
+					<td>${item.ImportNum || ''}</td>
+					<td>${item.ImportedFrom || ''}</td>
+					<td>${item.ImportedFromDesc || ''}</td>
+					<td>${item.DimCode || ''}</td>
+					<td>${item.AllocatedQty || ''}</td>
+					<td>${item.SalesAllocatedQty || ''}</td>
+					<td>${item.SalesPickingQty || ''}</td>
+					<td>${item.SalesPickedQty || ''}</td>
+					<td>${item.JobAllocatedQty || ''}</td>
+					<td>${item.JobPickingQty || ''}</td>
+					<td>${item.JobPickedQty || ''}</td>
+					<td>${item.TFOrdAllocatedQty || ''}</td>
+					<td>${item.TFOrdPickingQty || ''}</td>
+					<td>${item.TFOrdPickedQty || ''}</td>
+					<td>${item.ShippingQty || ''}</td>
+					<td>${item.PackedQty || ''}</td>
+					<td>${item.PCID || ''}</td>
+					<td>${item.SendToFSA || ''}</td>
+				</tr>
+			`;
+		});
+	}
+
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+	function setActivePage(page) {
+		currentPage = page; // Cập nhật trang hiện tại
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	}
+		let debounceTimeout;
+
+		document.getElementById('searchText').addEventListener('input', function () {
+			clearTimeout(debounceTimeout);
+			textSearch = this.value;
+			debounceTimeout = setTimeout(() => {
+				currentPage = 1;
+				renderTable(pageSize, currentPage);
+				renderPagging(pageSize, currentPage);
+			}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+		});
+
+	// Cập nhật giá trị pageSize khi thay đổi
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			console.log(currentPage);
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
+	});
+	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
+	renderTable(pageSize, currentPage);
+
+	function renderPagging(pageSize, currentPage) 
+	{
+		const filteredData = filterData(data, textSearch);
+		const totalItems = filteredData.length;
+		const totalPages = Math.ceil(totalItems / pageSize); 
+
+		const paginationElement = document.getElementById('pagination');
+		paginationElement.innerHTML = ''; // Xóa nội dung hiện tại
+
+		// Dọn dẹp nội dung cũ
+		paginationElement.innerHTML = '';
+
+		// Tạo danh sách phân trang
+		const ul = document.createElement('ul');
+		ul.className = 'pagination';
+
+		// Nút 'Previous'
+		const previousLi = document.createElement('li');
+		previousLi.className = currentPage > 1 ? 'page-item' : 'page-item disabled';
+		const previousLink = document.createElement('a');
+		previousLink.className = 'page-link';
+		previousLink.href = 'javascript:void(0)';
+		previousLink.textContent = 'Previous';
+		previousLink.onclick = currentPage > 1 ? () => setActivePage(currentPage - 1) : null;
+		previousLi.appendChild(previousLink);
+		ul.appendChild(previousLi);
+
+		// Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại
+		if (currentPage > 6)
+		{
+			const firstLi = document.createElement('li');
+			firstLi.className = 'page-item';
+			const firstLink = document.createElement('a');
+			firstLink.className = 'page-link';
+			firstLink.href = 'javascript:void(0)';
+			firstLink.onclick = () => setActivePage(1);
+			firstLink.textContent = '1';
+			firstLi.appendChild(firstLink);
+			ul.appendChild(firstLi);
+
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+		}
+
+		// Hiển thị 5 trang trước và 5 trang sau trang hiện tại
+		for (let i = Math.max(1, currentPage - 5); i <= Math.min(totalPages, currentPage + 5); i++) 
+		{
+			const pageLi = document.createElement('li');
+			pageLi.className = i === currentPage ? 'page-item active' : 'page-item';
+			const pageLink = document.createElement('a');
+			pageLink.className = 'page-link';
+			pageLink.href = 'javascript:void(0)';
+			pageLink.onclick = () => setActivePage(i);
+			pageLink.textContent = i.toString();
+			pageLi.appendChild(pageLink);
+			ul.appendChild(pageLi);
+		}
+
+		if (currentPage < totalPages - 5)
+		{
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+
+			const lastLi = document.createElement('li');
+			lastLi.className = 'page-item';
+			const lastLink = document.createElement('a');
+			lastLink.className = 'page-link';
+			lastLink.href = 'javascript:void(0)';
+			lastLink.onclick = () => setActivePage(totalPages);
+			lastLink.textContent = totalPages.toString();
+			lastLi.appendChild(lastLink);
+			ul.appendChild(lastLi);
+		}
+
+		const nextLi = document.createElement('li');
+		nextLi.className = currentPage < totalPages ? 'page-item' : 'page-item disabled';
+		const nextLink = document.createElement('a');
+		nextLink.className = 'page-link';
+		nextLink.href = 'javascript:void(0)';
+		nextLink.textContent = 'Next';
+		nextLink.onclick = currentPage < totalPages ? () => setActivePage(currentPage + 1) : null;
+		nextLi.appendChild(nextLink);
+		ul.appendChild(nextLi);
+
+		paginationElement.appendChild(ul);
+	}
+
+</script>
+
+@section css {
+							<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
+							<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
+							<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
+}
+
+
+@section script {
+	<!-- form js -->
+	<!-- this page js -->
+	<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+	<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+	<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+	<link href="~/css/spinner.css" rel="stylesheet" />
+	<script src="../../dist/js/custom.min.js"></script>
+
+	<script>
+
+		var table = $('#zero_config').DataTable({
+			paging: false, // Enable paging
+			searching: false, // Disable search
+			lengthChange: true, // Disable length change
+			ordering: true, // Disable automatic ordering
+			responsive: true,
+			language: {
+					info: "",
+					}
+			});
+
+
+	</script>
+	
+	<script>
+		$(document).ready(function () {
+			$("form").submit(function (e) {
+				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/GeneralReport/ExportVinamPartOnHandQuantity", // Đường dẫn đến action trong controller
+					type: "POST",
+					// data: {
+					// 	fromDate: startDate,
+					// 	toDate: endDate
+					// },
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'VinamPartOnHandQuantity.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	 </script>
+	 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Chặn phím Enter cho form có id là 'export-form'
+        const form = document.getElementById('export-form');
+        form.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn chặn hành động mặc định
+            }
+        });
+    });
+</script>
+}

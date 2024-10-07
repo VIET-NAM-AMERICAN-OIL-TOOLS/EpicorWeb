@@ -30,14 +30,12 @@ namespace EpicorWeb.Controllers
                     List<Groups> GroupList = new();
                     foreach (DataRow ListGroups in VinamListUsers.Rows)
                     {
-#pragma warning disable CS8604 // Possible null reference argument.
                         Groups groups = new()
                         {
                             ID = int.Parse(ListGroups["ID"].ToString()),
                             Name = ListGroups["Name"].ToString(),
                             Description = ListGroups["Description"].ToString()
                         };
-#pragma warning restore CS8604 // Possible null reference argument.
 
                         GroupList.Add(groups);
                     }

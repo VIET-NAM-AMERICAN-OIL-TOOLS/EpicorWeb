@@ -1,0 +1,17 @@
+﻿@model List<EpicorWeb.Models.VinamPartOnHandQuantity>
+
+@{
+	ViewData["Title"] = "**Vinam Part On Hand";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper" style="background-color:#ffffff">
+	<div class="card">
+		@Html.RenderPartialAsync("_PartOnHandQuantityPartialView",Model)
+	</div>
+</div>

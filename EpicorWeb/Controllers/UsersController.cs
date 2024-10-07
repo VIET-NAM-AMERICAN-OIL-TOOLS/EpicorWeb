@@ -30,7 +30,6 @@ namespace EpicorWeb.Controllers
                     List<Users> UserList = new();
                     foreach (DataRow ListUsers in VinamListUsers.Rows)
                     {
-#pragma warning disable CS8604 // Possible null reference argument.
                         Users users = new()
                         {
                             ID = ListUsers["ID"].ToString(),
@@ -38,7 +37,6 @@ namespace EpicorWeb.Controllers
                             GroupName = ListUsers["GroupName"].ToString(),
                             GroupID = int.Parse(ListUsers["GroupID"].ToString())
                         };
-#pragma warning restore CS8604 // Possible null reference argument.
 
                         UserList.Add(users);
                     }
@@ -99,7 +97,25 @@ namespace EpicorWeb.Controllers
         {
             string query = "Exec SP_InsertUserCategoryAuthetication @UserId , @GroupName";
             int dem = new DataProviderLocal().ExecuteNonQuery (query, new object[] {Id, GroupID });
-            return RedirectToAction("Index");
-        }
+
+			// Lấy danh sách mới sau khi cập nhật
+			string query2 = "exec SP_GetListUser";
+			DataTable VinamListUsers = new DataProviderLocal().ExecuteQuery(query2);
+			List<Users> UserList = new();
+			foreach (DataRow ListUsers in VinamListUsers.Rows)
+			{
+				Users users = new()
+				{
+					ID = ListUsers["ID"].ToString(),
+					Name = ListUsers["UserName"].ToString(),
+					GroupName = ListUsers["GroupName"].ToString(),
+					GroupID = int.Parse(ListUsers["GroupID"].ToString())
+				};
+				UserList.Add(users);
+			}
+
+			// Trả về PartialView chứa danh sách cập nhật
+			return PartialView("_UserListPartialView", UserList);
+		}
     }
 }
