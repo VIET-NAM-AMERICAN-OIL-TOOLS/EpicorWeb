@@ -197,10 +197,21 @@
 	</div>
 </div>
 <div id="myModalContainer"></div>
+
+<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
+<!-- this page js -->
+<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+<link href="~/css/spinner.css" rel="stylesheet" />
+<script src="../../dist/js/custom.min.js"></script>
+
 <script>
 
 	// Chuyển dữ liệu từ server vào biến JavaScript
-	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model)); 
 	let currentPage = @CurrentPage;
 	let pageSize = @PageSize;
 	let textSearch = "";
@@ -222,7 +233,7 @@
 			const PONum = (item.PONum || "").toLowerCase().includes(searchText.toLowerCase());
 			const LineDesc = (item.LineDesc || "").toLowerCase().includes(searchText.toLowerCase());
 			// Nếu một trong các cột có chứa giá trị tìm kiếm, trả về true
-			return PartNum || WarehouseCode || BinNum || LotNum || PONum || LineDesc ;
+			return PartNum || WarehouseCode || BinNum || LotNum || PONum || LineDesc;
 		});
 	}
 
@@ -235,25 +246,25 @@
 
 		paginatedItems.forEach(item => {
 			tableBody.innerHTML += `
-			<tr>
+				<tr>
 
-				<td>${item.Company || ''}</td>
-				<td>${item.PartNum || ''}</td>
-				<td>${item.WarehouseCode || ''}</td>
-				<td>${item.BinNum || ''}</td>
-				<td>${item.OnhandQty || ''}</td>
-				<td>${item.LotNum || ''}</td>
-				<td>${item.PONum || ''}</td>
-				<td>${item.POLine || ''}</td>
-				<td>${item.PORel_PORelNum || ''}</td>
-				<td>${item.LineDesc || ''}</td>
-				<td>${item.OrderQty || '' || ''}</td>
-				<td>${item.IUM || '' || ''}</td>
-				<td>${item.UnitCost || ''}</td>
-				<td>${item.DocUnitCost || ''}</td>
-							
-			</tr>
-			`;
+					<td>${item.Company || ''}</td>
+					<td>${item.PartNum || ''}</td>
+					<td>${item.WarehouseCode || ''}</td>
+					<td>${item.BinNum || ''}</td>
+					<td>${item.OnhandQty || ''}</td>
+					<td>${item.LotNum || ''}</td>
+					<td>${item.PONum || ''}</td>
+					<td>${item.POLine || ''}</td>
+					<td>${item.PORel_PORelNum || ''}</td>
+					<td>${item.LineDesc || ''}</td>
+					<td>${item.OrderQty || '' || ''}</td>
+					<td>${item.IUM || '' || ''}</td>
+					<td>${item.UnitCost || ''}</td>
+					<td>${item.DocUnitCost || ''}</td>
+
+				</tr>
+				`;
 		});
 	}
 
@@ -385,7 +396,16 @@
 
 		paginationElement.appendChild(ul);
 	}
-
+	var table = $('#zero_config').DataTable({
+		paging: false, // Enable paging
+		searching: false, // Disable search
+		lengthChange: true, // Disable length change
+		ordering: true, // Disable automatic ordering
+		responsive: true,
+		language: {
+			info: "",
+		}
+	});
 </script>
 
 @section css {

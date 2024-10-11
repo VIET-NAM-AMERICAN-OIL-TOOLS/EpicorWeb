@@ -14,108 +14,205 @@ namespace EpicorWeb.Common
 {
 	public static class Commonsetup
 	{
-		public static List<T> ConvertDataTableToObject<T>(DataTable dt)
+		//public static List<T> ConvertDataTableToObject<T>(DataTable dt)
+		//{
+		//	List<T> data = new List<T>();
+		//	foreach (DataRow row in dt.Rows)
+		//	{
+		//		T item = GetItemPDM<T>(row);
+		//		data.Add(item);
+		//	}
+		//	return data;
+		//}
+		//private static T GetItemPDM<T>(DataRow dr)
+		//{
+		//	Type temp = typeof(T);
+		//	T obj = Activator.CreateInstance<T>();
+
+		//	try
+		//	{
+		//		foreach (DataColumn column in dr.Table.Columns)
+		//		{
+		//			foreach (PropertyInfo pro in temp.GetProperties())
+		//			{
+		//				if (pro.Name == column.ColumnName)
+		//				{
+		//					try
+		//					{
+		//						object value = dr[column.ColumnName];
+		//						if (value != DBNull.Value)
+		//						{
+		//							// Xử lý kiểu số nguyên có nullable
+		//							if (Nullable.GetUnderlyingType(pro.PropertyType) != null && pro.PropertyType == typeof(int?))
+		//							{
+		//								if (value is long || value is int)
+		//								{
+		//									pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType)), null);
+		//								}
+		//								else
+		//								{
+		//									pro.SetValue(obj, null, null);
+		//								}
+		//							}
+		//							else if (pro.PropertyType == typeof(float) || pro.PropertyType == typeof(double) || pro.PropertyType == typeof(int) || pro.PropertyType == typeof(decimal))
+		//							{
+		//								pro.SetValue(obj, Convert.ChangeType(value, pro.PropertyType), null);
+		//							}
+		//							// Xử lý kiểu bool và bool?
+		//							else if (pro.PropertyType == typeof(bool) || pro.PropertyType == typeof(bool?))
+		//							{
+		//								bool? boolValue = value as bool?;
+		//								if (boolValue == null && value is SByte sbyteValue)
+		//								{
+		//									boolValue = sbyteValue == 1 ? true : (sbyteValue == 0 ? (bool?)false : null);
+		//								}
+		//								pro.SetValue(obj, boolValue, null);
+		//							}
+		//							// Xử lý kiểu DateTime và DateTime?
+		//							else if (pro.PropertyType == typeof(DateTime) || pro.PropertyType == typeof(DateTime?))
+		//							{
+		//								if (pro.PropertyType == typeof(System.DateTime))
+		//								{
+		//									// Chuyển đổi giá trị sang DateOnly
+		//									if (value is DateTime dateTimeValue)
+		//									{
+		//										pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType) ?? pro.PropertyType), null);
+		//									}
+		//									else
+		//									{
+		//										pro.SetValue(obj, null, null);
+		//									}
+		//								}
+		//								else
+		//								{
+		//									// Chuyển đổi giá trị sang DateTime hoặc DateTime?
+		//									pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType) ?? pro.PropertyType), null);
+		//								}
+		//							}
+		//							else
+		//							{
+		//								pro.SetValue(obj, value, null);
+		//							}
+		//						}
+		//						else
+		//						{
+		//							pro.SetValue(obj, null, null);
+		//						}
+		//					}
+		//					catch (Exception ex)
+		//					{
+		//						var prop = pro.Name;
+		//						// Xử lý lỗi chuyển đổi kiểu dữ liệu
+		//					}
+		//				}
+		//			}
+		//		}
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		// Xử lý lỗi chung
+		//	}
+
+		//	return obj;
+		//}
+		public static List<T> ConvertDataTableToObject<T>(DataTable dt) where T : new()
 		{
 			List<T> data = new List<T>();
+
+			// Cache properties for the target type
+			var properties = typeof(T).GetProperties().ToDictionary(p => p.Name, p => p);
+
 			foreach (DataRow row in dt.Rows)
 			{
-				T item = GetItemPDM<T>(row);
-				data.Add(item);
-			}
-			return data;
-		}
-		private static T GetItemPDM<T>(DataRow dr)
-		{
-			Type temp = typeof(T);
-			T obj = Activator.CreateInstance<T>();
+				T item = new T();
 
-			try
-			{
-				foreach (DataColumn column in dr.Table.Columns)
+				foreach (DataColumn column in dt.Columns)
 				{
-					foreach (PropertyInfo pro in temp.GetProperties())
+					if (properties.TryGetValue(column.ColumnName, out var property))
 					{
-						if (pro.Name == column.ColumnName)
+						object value = row[column.ColumnName];
+
+						if (value != DBNull.Value)
 						{
 							try
 							{
-								object value = dr[column.ColumnName];
-								if (value != DBNull.Value)
+								Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+								if (propertyType == typeof(bool) || propertyType == typeof(bool?))
 								{
-									// Xử lý kiểu số nguyên có nullable
-									if (Nullable.GetUnderlyingType(pro.PropertyType) != null && pro.PropertyType == typeof(int?))
+									bool? boolValue = value as bool?;
+									if (value is SByte sbyteValue)
 									{
-										if (value is long || value is int)
-										{
-											pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType)), null);
-										}
-										else
-										{
-											pro.SetValue(obj, null, null);
-										}
+										boolValue = sbyteValue == 1 ? true : (sbyteValue == 0 ? (bool?)false : null);
 									}
-									else if (pro.PropertyType == typeof(float) || pro.PropertyType == typeof(double) || pro.PropertyType == typeof(int) || pro.PropertyType == typeof(decimal))
-									{
-										pro.SetValue(obj, Convert.ChangeType(value, pro.PropertyType), null);
-									}
-									// Xử lý kiểu bool và bool?
-									else if (pro.PropertyType == typeof(bool) || pro.PropertyType == typeof(bool?))
-									{
-										bool? boolValue = value as bool?;
-										if (boolValue == null && value is SByte sbyteValue)
-										{
-											boolValue = sbyteValue == 1 ? true : (sbyteValue == 0 ? (bool?)false : null);
-										}
-										pro.SetValue(obj, boolValue, null);
-									}
-									// Xử lý kiểu DateTime và DateTime?
-									else if (pro.PropertyType == typeof(DateTime) || pro.PropertyType == typeof(DateTime?))
-									{
-										if (pro.PropertyType == typeof(System.DateTime))
-										{
-											// Chuyển đổi giá trị sang DateOnly
-											if (value is DateTime dateTimeValue)
-											{
-												pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType) ?? pro.PropertyType), null);
-											}
-											else
-											{
-												pro.SetValue(obj, null, null);
-											}
-										}
-										else
-										{
-											// Chuyển đổi giá trị sang DateTime hoặc DateTime?
-											pro.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType) ?? pro.PropertyType), null);
-										}
-									}
-									else
-									{
-										pro.SetValue(obj, value, null);
-									}
+									property.SetValue(item, boolValue);
+								}
+								else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+								{
+									property.SetValue(item, Convert.ChangeType(value, propertyType));
+								}
+								else if (propertyType.IsEnum)
+								{
+									property.SetValue(item, Enum.ToObject(propertyType, value));
 								}
 								else
 								{
-									pro.SetValue(obj, null, null);
+									property.SetValue(item, Convert.ChangeType(value, propertyType));
 								}
 							}
 							catch (Exception ex)
 							{
-								var prop = pro.Name;
-								// Xử lý lỗi chuyển đổi kiểu dữ liệu
+								// Log error (optional)
+								Console.WriteLine($"Error converting {column.ColumnName}: {ex.Message}");
 							}
+						}
+						else
+						{
+							property.SetValue(item, null);
 						}
 					}
 				}
-			}
-			catch (Exception ex)
-			{
-				// Xử lý lỗi chung
+
+				data.Add(item);
 			}
 
-			return obj;
+			return data;
 		}
+		public static List<T> ConvertDataTableToListFast<T>(DataTable table) where T : new()
+		{
+			
+			List<T> list = new List<T>();
+			var properties = typeof(T).GetProperties();
 
+			// Tạo ánh xạ index của cột với thuộc tính để tránh lặp lại thao tác tìm kiếm tên cột
+			Dictionary<string, PropertyInfo> propertyMap = properties.ToDictionary(p => p.Name);
+
+			foreach (DataRow row in table.Rows)
+			{
+				T obj = new T();
+				foreach (DataColumn column in table.Columns)
+				{
+					if (propertyMap.TryGetValue(column.ColumnName, out PropertyInfo prop))
+					{
+						try
+						{
+							object value = row[column];
+							if (value != DBNull.Value)
+							{
+								Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+								prop.SetValue(obj, Convert.ChangeType(value, propType));
+							}
+						}
+						catch (Exception ex)
+						{
+						}
+					}
+				}
+				list.Add(obj);
+			}
+
+			return list;
+		}
 		public static DataTable ConvertToDataTable<T>(List<T> items)
 		{
 			DataTable dataTable = new DataTable(typeof(T).Name);

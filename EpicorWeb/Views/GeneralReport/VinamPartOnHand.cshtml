@@ -235,6 +235,17 @@
 	</div>
 </div>
 <div id="myModalContainer"></div>
+
+	<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
+	<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
+	<!-- this page js -->
+	<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+	<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+	<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
+	<link href="~/css/spinner.css" rel="stylesheet" />
+	<script src="../../dist/js/custom.min.js"></script>
+
 <script  type="text/javascript">
 
 	// Chuyển dữ liệu từ server vào biến JavaScript
@@ -450,13 +461,23 @@
 
 		paginationElement.appendChild(ul);
 	}
+	var table = $('#zero_config').DataTable({
+		paging: false, // Enable paging
+		searching: false, // Disable search
+		lengthChange: true, // Disable length change
+		ordering: true, // Disable automatic ordering
+		responsive: true,
+		language: {
+			info: "",
+		}
+	});
 
 </script>
 
 @section css {
-							<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
-							<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-							<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
+	<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
 }
 
 

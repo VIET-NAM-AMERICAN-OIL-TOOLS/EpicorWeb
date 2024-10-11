@@ -1,0 +1,817 @@
+﻿@model System.Data.DataTable
+
+@{
+
+	ViewData["Title"] = "**Vinam GL Journal Combined";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
+	// Tính ngày đầu tuần (Thứ Hai) và cuối tuần (Chủ Nhật)
+	var today = DateTime.Today;
+	var startOfWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday); // Thứ Hai
+	var endOfWeek = startOfWeek.AddDays(6); // Chủ Nhật
+
+	int PageSize = 20; // Giá trị mặc định
+	int CurrentPage = 1; // Trang hiện tại
+	int totalItems = Model.Rows.Count; // Tổng số mục có trong Model
+	int totalPages = (int)Math.Ceiling((double)totalItems / PageSize); // Tổng số trang
+
+	// Tạo DataTable mới chứa các dòng được phân trang
+	System.Data.DataTable paginatedModel = Model.Clone(); // Sao chép cấu trúc của DataTable ban đầu
+
+	// Lấy các dòng tương ứng với trang hiện tại
+	int startIndex = (CurrentPage - 1) * PageSize;
+	int endIndex = Math.Min(startIndex + PageSize, totalItems);
+
+	for (int i = startIndex; i < endIndex; i++)
+	{
+		paginatedModel.ImportRow(Model.Rows[i]); // Thêm các dòng vào bảng phân trang
+	}
+}
+
+<div class="page-wrapper" style="background-color:#ffffff">
+	<div class="card">
+		@* <form action="~/GeneralReport/ExportVinamPartList" method="post" enctype="multipart/form-data"> *@
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<h4 class="card-title pb-4">**Vinam GL Joural Combined</h4>
+				</div>
+				<div class="col-md-6 text-end">
+					@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
+					<div id="resultMessage" style="color: green;"></div>
+				</div>
+			</div>
+			<div class="border-top">
+				<div class="card-body">
+					<h4 class="card-title">Vinam GL Joural Combined</h4>
+					<button class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
+							id="export-button" name="export-button">
+						Xuất Excel
+					</button>
+					<div class="row">
+						<div class="col-6">
+							<label class="mt-3">From Date</label>
+							<div class="input-group">
+								<input type="text" class="form-control datepicker-autoclose" id="fromDate" name="fromDate"
+									   placeholder="mm/dd/yyyy" value="@startOfWeek.ToString("MM/dd/yyyy")" autocomplete="off">
+								<div class="input-group-append">
+									<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+						</div>
+						<div class="col-6">
+							<label class="mt-3">To Date</label>
+							<div class="input-group">
+								<input type="text" class="form-control datepicker-autoclose" id="toDate" name="toDate"
+									   placeholder="mm/dd/yyyy" value="@endOfWeek.ToString("MM/dd/yyyy")" autocomplete="off">
+								<div class="input-group-append">
+									<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+			<div class="table-responsive">
+				<div class="row">
+					<div class="col-sm-6 col-md-3">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="show">Show</span>
+							</div>
+							<select id="pageSizeSelect" class="form-select" aria-label="Default select example" aria-describedby="show">
+								<option value="20" selected>20</option>
+								<option value="50">50</option>
+								<option value="100">100</option>
+								@* <option value="-1">All</option> *@
+							</select>
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="show">entries</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+					</div>
+					<div class="col-sm-6 col-md-6">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon1">Search</span>
+							</div>
+							<input type="text" class="form-control" id="searchText" placeholder="Tìm kiếm" aria-label="Search" aria-describedby="basic-addon1">
+						</div>
+					</div>
+				</div>
+
+
+				<div class="row">
+					<nav class="col-12" aria-label="Page navigation example" id="pagination">
+						<ul class="pagination">
+
+							@if (CurrentPage > 1)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" tabindex="" onclick="changePage(@(CurrentPage - 1))">Previous</a>
+								</li>
+							}
+							else
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">Previous</a>
+								</li>
+							}
+
+							<!-- Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại -->
+							@if (CurrentPage > 6)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(1)">1</a>
+								</li>
+								<li class="page-item disabled">
+									<a class="page-link" href="#">...</a>
+								</li>
+							}
+
+							<!-- Hiển thị 5 trang trước và 5 trang sau trang hiện tại -->
+							@for (int i = Math.Max(1, CurrentPage - 5); i <= Math.Min(totalPages, CurrentPage + 5); i++)
+							{
+								if (i == CurrentPage)
+								{
+									<li class="page-item active">
+										<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+									</li>
+								}
+								else
+								{
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+									</li>
+								}
+							}
+
+							<!-- Hiển thị trang cuối cùng nếu không nằm trong dãy gần trang hiện tại -->
+							@if (CurrentPage < totalPages - 5)
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">...</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@totalPages)">@totalPages</a>
+								</li>
+							}
+
+							<!-- Nút 'Next' -->
+							@if (CurrentPage < totalPages)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@(CurrentPage + 1))">Next</a>
+								</li>
+							}
+							else
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">Next</a>
+								</li>
+							}
+						</ul>
+					</nav>
+				</div>
+				<table id="zero_config" class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>Company</th>
+							<th>COACode</th>
+							<th>GroupID</th>
+							<th>PostedBy</th>
+							<th>PostedDate</th>
+							<th>CreateDate</th>
+							<th>Posted</th>
+							<th>SourceModule</th>
+							<th>FiscalYear</th>
+							<th>FiscalPeriod</th>
+							<th>JEDate</th>
+							<th>JournalCode</th>
+							<th>JournalNum</th>
+							<th>JournalLine</th>
+							<th>GLDesc</th>
+							<th>VNDescription</th>
+							<th>GLAccount</th>
+							<th>SegValue1</th>
+							<th>SegValue2</th>
+							<th>COASegValues SegmentName</th>
+							<th>SegValue3</th>
+							<th>SegValue4</th>
+							<th>SegValue5</th>
+							<th>SegValue6</th>
+							<th>SegValue7</th>
+							<th>GLAccount</th>
+							<th>DebitAmt</th>
+							<th>CreditAmt</th>
+							<th>BookDebit</th>
+							<th>BookCredit</th>
+							<th>LegalNumber</th>
+							<th>BankAcctID</th>
+							<th>BankAcct Description</th>
+							<th>VendorID</th>
+							<th>Vendor Name</th>
+							<th>RcvLegal</th>
+							<th>APInvoiceNum</th>
+							<th>LegalNumber</th>
+							<th>ReportDate</th>
+							<th>Description</th>
+							<th>CheckNum</th>
+							<th>Customer CustID</th>
+							<th>Customer Name</th>
+							<th>ARInvoiceNum</th>
+							<th>InvcHead LegalNumber</th>
+							<th>InvcHead ReportDate</th>
+							<th>CashHead CheckRef</th>
+							<th>BatchID</th>
+							<th>AllocID</th>
+							<th>CurrencyCode</th>
+						</tr>
+					</thead>
+					@if (paginatedModel != null && paginatedModel.Rows.Count > 0)
+					{
+						<tbody id="data-body">
+							@foreach (System.Data.DataRow inv in paginatedModel.Rows)
+							{
+								<tr>
+									<td>@inv["GLJrnDtl_Company"]</td>
+									<td>@inv["GLJrnDtl_COACode"]</td>
+									<td>@inv["GLJrnDtl_GroupID"]</td>
+									<td>@inv["GLJrnDtl_PostedBy"]</td>
+									<td>
+										@(inv["GLJrnDtl_PostedDate"] != DBNull.Value && inv["GLJrnDtl_PostedDate"] is DateTime postedDate
+																	? postedDate.ToString("dd-MM-yyyy hh:mm:ss")
+																	: "")
+									</td>
+									<td>
+										@(inv["GLJrnDtl_CreateDate"] != DBNull.Value && inv["GLJrnDtl_CreateDate"] is DateTime createDate
+																	? createDate.ToString("dd-MM-yyyy")
+																	: "")
+									</td>
+									@* <td>@inv["GLJrnDtl_CreateDate"]</td> *@
+									<td>@inv["GLJrnDtl_Posted"]</td>
+									<td>@inv["GLJrnDtl_SourceModule"]</td>
+									<td>@inv["GLJrnDtl_FiscalYear"]</td>
+									<td>@inv["GLJrnDtl_FiscalPeriod"]</td>
+									@* <td>@inv["GLJrnDtl_JEDate"]</td> *@
+									<td>
+										@(inv["GLJrnDtl_JEDate"] != DBNull.Value && inv["GLJrnDtl_JEDate"] is DateTime JEDate
+																	? JEDate.ToString("dd-MM-yyyy")
+																	: "")
+									</td>
+									<td>@inv["GLJrnDtl_JournalCode"]</td>
+									<td>@inv["GLJrnDtl_JournalNum"]</td>
+									<td>@inv["GLJrnDtl_JournalLine"]</td>
+									<td>@inv["Calculated_GLDesc"]</td>
+									<td>@inv["GLJrnDtl_VNDescription_c"]</td>
+									<td>@inv["GLJrnDtl_GLAccount"]</td>
+									<td>@inv["GLJrnDtl_SegValue1"]</td>
+									<td>@inv["GLJrnDtl_SegValue2"]</td>
+									<td>@inv["COASegValues_SegmentName"]</td>
+									<td>@inv["GLJrnDtl_SegValue3"]</td>
+									<td>@inv["GLJrnDtl_SegValue4"]</td>
+									<td>@inv["GLJrnDtl_SegValue5"]</td>
+									<td>@inv["GLJrnDtl_SegValue6"]</td>
+									<td>@inv["GLJrnDtl_SegValue7"]</td>
+									<td>@inv["GLJrnDtl1_GLAccount"]</td>
+									<td>@inv["Calculated_DebitAmt"]</td>
+									<td>@inv["Calculated_CreditAmt"]</td>
+									<td>@inv["Calculated_BookDebit"]</td>
+									<td>@inv["Calculated_BookCredit"]</td>
+									<td>@inv["GLJrnDtl_LegalNumber"]</td>
+									<td>@inv["GLJrnDtl_BankAcctID"]</td>
+									<td>@inv["BankAcct_Description"]</td>
+									<td>@inv["Vendor_VendorID"]</td>
+									<td>@inv["Vendor_Name"]</td>
+									<td>@inv["Calculated_RcvLegal"]</td>
+									<td>@inv["GLJrnDtl_APInvoiceNum"]</td>
+									<td>@inv["APInvHed_LegalNumber"]</td>
+									<td>@inv["APInvHed_ReportDate_c"]</td>
+									<td>@inv["APInvDtl_Description"]</td>
+									<td>@inv["GLJrnDtl_CheckNum"]</td>
+									<td>@inv["Customer_CustID"]</td>
+									<td>@inv["Customer_Name"]</td>
+									<td>@inv["GLJrnDtl_ARInvoiceNum"]</td>
+									<td>@inv["InvcHead_LegalNumber"]</td>
+									<td>@inv["InvcHead_ReportDate_c"]</td>
+									<td>@inv["CashHead_CheckRef"]</td>
+									<td>@inv["AlcHistDtl_BatchID"]</td>
+									<td>@inv["AlcHistDtl_AllocID"]</td>
+									<td>@inv["GLJrnDtl_CurrencyCode"]</td>
+								</tr>
+							}
+						</tbody>
+					}
+					else
+					{
+						<tr>
+							<td colspan="40">No records found.</td>
+						</tr>
+					}
+				</table>
+			</div>
+		</div>
+		@* </form> *@
+	</div>
+</div>
+<div id="myModalContainer"></div>
+
+<!-- Hiệu ứng chờ -->
+<div id="loading-spinner">
+	<div class="spinner"></div>
+</div>
+<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+
+<link href="~/css/spinner.css" rel="stylesheet" />
+
+<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="../../dist/js/custom.min.js"></script>
+<script>
+	// Chuyển dữ liệu từ server vào biến JavaScript
+	let dataJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+	let currentPage = @CurrentPage;
+	let pageSize = @PageSize;
+	let textSearch = "";
+
+	jQuery('.datepicker-autoclose').datepicker({
+		autoclose: true,
+		todayHighlight: true,
+		orientation: 'bottom'
+	});
+	// Tạo hàm dùng chung để xử lý sự kiện change cho cả fromDate và toDate
+	function handleDateChange() {
+		var startDate = $("#fromDate").val();
+		var endDate = $("#toDate").val();
+
+		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+		if (!startDate || !endDate) {
+			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+			return; // Dừng xử lý nếu không chọn đủ hai ngày
+		}
+		$("#loading-spinner").show();
+
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/VinamGLJournalCombined", // Đường dẫn đến action trong controller
+			type: "GET",
+			data: {
+				fromDate: startDate,
+				toDate: endDate
+			},
+			success: function (result) {
+				console.log(result); // Xử lý kết quả trả về từ server
+				$("#loading-spinner").hide();
+
+				dataJson = JSON.parse(result);
+				currentPage = 1; // Đặt lại trang hiện tại về 1
+				renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+				renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+
+
+			},
+			error: function (error) {
+				console.error("Đã xảy ra lỗi khi gửi yêu cầu:", error);
+			}
+		});
+	}
+	// Sử dụng sự kiện changeDate của bootstrap-datepicker
+	$('#fromDate').datepicker().on('changeDate', handleDateChange);
+	$('#toDate').datepicker().on('changeDate', handleDateChange);
+	document.addEventListener('DOMContentLoaded', function () {
+		// Chặn phím Enter cho form có id là 'export-form'
+		const form = document.getElementById('export-form');
+		form.addEventListener('keydown', function (event) {
+			if (event.key === 'Enter') {
+				event.preventDefault(); // Ngăn chặn hành động mặc định
+				return false;
+			}
+		});
+	});
+
+
+
+	function filterData(data, searchText) {
+		return data.filter(item => {
+			const GLJrnDtl_PostedBy = (item.GLJrnDtl_PostedBy || "").toLowerCase().includes(searchText.toLowerCase());
+			const GLJrnDtl_VNDescription_c = (item.GLJrnDtl_VNDescription_c || "").toLowerCase().includes(searchText.toLowerCase());
+			const Calculated_GLDesc = (item.Calculated_GLDesc || "").toLowerCase().includes(searchText.toLowerCase());
+			const GLJrnDtl_LegalNumber = (item.GLJrnDtl_LegalNumber || "").toLowerCase().includes(searchText.toLowerCase());
+			// Nếu một trong các cột có chứa giá trị tìm kiếm, trả về true
+			return GLJrnDtl_PostedBy || GLJrnDtl_VNDescription_c || Calculated_GLDesc || GLJrnDtl_LegalNumber;
+		});
+	}
+
+	function renderTable(pageSize, currentPage) {
+		const tableBody = document.getElementById('data-body');
+		tableBody.innerHTML = ''; // Xóa nội dung hiện tại
+		const filteredData = filterData(dataJson, textSearch);
+		const paginatedItems = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+		paginatedItems.forEach(item => {
+			tableBody.innerHTML += `
+				<tr>
+					<td>${item.GLJrnDtl_Company || ''}</td>
+					<td>${item.GLJrnDtl_COACode || ''}</td>
+					<td>${item.GLJrnDtl_GroupID || ''}</td>
+					<td>${item.GLJrnDtl_PostedBy || ''}</td>
+					<td>${formatDate(item.GLJrnDtl_PostedDate, true) || ''}</td>
+					<td>${formatDate(item.GLJrnDtl_CreateDate) || ''}</td>
+					<td>${item.GLJrnDtl_Posted || ''}</td>
+					<td>${item.GLJrnDtl_SourceModule || ''}</td>
+					<td>${item.GLJrnDtl_FiscalYear || ''}</td>
+					<td>${item.GLJrnDtl_FiscalPeriod || ''}</td>
+					<td>${formatDate(item.GLJrnDtl_JEDate) || ''}</td>
+					<td>${item.GLJrnDtl_JournalCode || ''}</td>
+					<td>${item.GLJrnDtl_JournalNum || ''}</td>
+					<td>${item.GLJrnDtl_JournalLine || ''}</td>
+					<td>${item.Calculated_GLDesc || ''}</td>
+					<td>${item.GLJrnDtl_VNDescription_c || ''}</td>
+					<td>${item.GLJrnDtl_GLAccount || ''}</td>
+					<td>${item.GLJrnDtl_SegValue1 || ''}</td>
+					<td>${item.GLJrnDtl_SegValue2 || ''}</td>
+					<td>${item.COASegValues_SegmentName || ''}</td>
+					<td>${item.GLJrnDtl_SegValue3 || ''}</td>
+					<td>${item.GLJrnDtl_SegValue4 || ''}</td>
+					<td>${item.GLJrnDtl_SegValue5 || ''}</td>
+					<td>${item.GLJrnDtl_SegValue6 || ''}</td>
+					<td>${item.GLJrnDtl_SegValue7 || ''}</td>
+					<td>${item.GLJrnDtl1_GLAccount || ''}</td>
+					<td>${item.Calculated_DebitAmt || ''}</td>
+					<td>${item.Calculated_CreditAmt || ''}</td>
+					<td>${item.Calculated_BookDebit || ''}</td>
+					<td>${item.Calculated_BookCredit || ''}</td>
+					<td>${item.GLJrnDtl_LegalNumber || ''}</td>
+					<td>${item.GLJrnDtl_BankAcctID || ''}</td>
+					<td>${item.BankAcct_Description || ''}</td>
+					<td>${item.Vendor_VendorID || ''}</td>
+					<td>${item.Vendor_Name || ''}</td>
+					<td>${item.Calculated_RcvLegal || ''}</td>
+					<td>${item.GLJrnDtl_APInvoiceNum || ''}</td>
+					<td>${item.APInvHed_LegalNumber || ''}</td>
+					<td>${item.APInvHed_ReportDate_c || ''}</td>
+					<td>${item.APInvDtl_Description || ''}</td>
+					<td>${item.GLJrnDtl_CheckNum || ''}</td>
+					<td>${item.Customer_CustID || ''}</td>
+					<td>${item.Customer_Name || ''}</td>
+					<td>${item.GLJrnDtl_ARInvoiceNum || ''}</td>
+					<td>${item.InvcHead_LegalNumber || ''}</td>
+					<td>${item.InvcHead_ReportDate_c || ''}</td>
+					<td>${item.CashHead_CheckRef || ''}</td>
+					<td>${item.AlcHistDtl_BatchID || ''}</td>
+					<td>${item.AlcHistDtl_AllocID || ''}</td>
+					<td>${item.GLJrnDtl_CurrencyCode || ''}</td>
+				</tr>
+			`;
+		});
+	}
+	function formatDate(dateString, formatTime = false) {
+		if (!dateString) {
+			return ''; // Nếu không có ngày, trả về chuỗi rỗng
+		}
+
+		// Chuyển đổi chuỗi thành đối tượng Date
+		const date = new Date(dateString);
+
+		// Kiểm tra nếu dateString không hợp lệ
+		if (isNaN(date)) {
+			return ''; // Trả về chuỗi rỗng nếu không hợp lệ
+		}
+
+		// Lấy các giá trị ngày, tháng, năm, giờ, phút, giây
+		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng tính từ 0 nên cần +1
+		const year = date.getFullYear();
+		const hours = String(date.getHours()).padStart(2, '0');
+		const minutes = String(date.getMinutes()).padStart(2, '0');
+		const seconds = String(date.getSeconds()).padStart(2, '0');
+		if (formatTime == true)
+			return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`
+		else return `${day}-${month}-${year}`;
+		// Trả về chuỗi định dạng dd-mm-yyyy hh:mm:ss
+		// return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+	}
+	document.getElementById('export-button').addEventListener('click', function () {
+
+		var startDate = $("#fromDate").val();
+		var endDate = $("#toDate").val();
+
+		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+		if (!startDate || !endDate) {
+			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+			return; // Dừng xử lý nếu không chọn đủ hai ngày
+		}
+
+		$("#loading-spinner").show();
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/ExportVinamGLJournalCombined", // Đường dẫn đến action trong controller
+			type: "POST",
+			data: {
+				fromDate: startDate,
+				toDate: endDate
+			},
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (data) {
+				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#export-button").prop("disabled", false);
+				var link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = 'ExportVinamGLJournalCombined.xlsx'; // Đặt tên file Excel
+				link.style.display = 'none';
+
+				document.body.appendChild(link);
+				link.click();
+
+				window.URL.revokeObjectURL(link.href);
+				document.body.removeChild(link);
+			}
+		});
+	});
+
+
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+	function setActivePage(page) {
+		currentPage = page; // Cập nhật trang hiện tại
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	}
+	let debounceTimeout;
+
+	document.getElementById('searchText').addEventListener('input', function () {
+		clearTimeout(debounceTimeout);
+		textSearch = this.value;
+		debounceTimeout = setTimeout(() => {
+			currentPage = 1;
+			renderTable(pageSize, currentPage);
+			renderPagging(pageSize, currentPage);
+		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+	});
+
+	// Cập nhật giá trị pageSize khi thay đổi
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			console.log(currentPage);
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
+	});
+	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
+	renderTable(pageSize, currentPage);
+
+	function renderPagging(pageSize, currentPage) {
+
+		const filteredData = filterData(dataJson, textSearch);
+		const totalItems = filteredData.length;
+		const totalPages = Math.ceil(totalItems / pageSize);
+
+		const paginationElement = document.getElementById('pagination');
+		paginationElement.innerHTML = ''; // Xóa nội dung hiện tại
+
+		// Dọn dẹp nội dung cũ
+		paginationElement.innerHTML = '';
+
+		// Tạo danh sách phân trang
+		const ul = document.createElement('ul');
+		ul.className = 'pagination';
+
+		// Nút 'Previous'
+		const previousLi = document.createElement('li');
+		previousLi.className = currentPage > 1 ? 'page-item' : 'page-item disabled';
+		const previousLink = document.createElement('a');
+		previousLink.className = 'page-link';
+		previousLink.href = 'javascript:void(0)';
+		previousLink.textContent = 'Previous';
+		previousLink.onclick = currentPage > 1 ? () => setActivePage(currentPage - 1) : null;
+		previousLi.appendChild(previousLink);
+		ul.appendChild(previousLi);
+
+		// Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại
+		if (currentPage > 6) {
+			const firstLi = document.createElement('li');
+			firstLi.className = 'page-item';
+			const firstLink = document.createElement('a');
+			firstLink.className = 'page-link';
+			firstLink.href = 'javascript:void(0)';
+			firstLink.onclick = () => setActivePage(1);
+			firstLink.textContent = '1';
+			firstLi.appendChild(firstLink);
+			ul.appendChild(firstLi);
+
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+		}
+
+		// Hiển thị 5 trang trước và 5 trang sau trang hiện tại
+		for (let i = Math.max(1, currentPage - 5); i <= Math.min(totalPages, currentPage + 5); i++) {
+			const pageLi = document.createElement('li');
+			pageLi.className = i === currentPage ? 'page-item active' : 'page-item';
+			const pageLink = document.createElement('a');
+			pageLink.className = 'page-link';
+			pageLink.href = 'javascript:void(0)';
+			pageLink.onclick = () => setActivePage(i);
+			pageLink.textContent = i.toString();
+			pageLi.appendChild(pageLink);
+			ul.appendChild(pageLi);
+		}
+
+		if (currentPage < totalPages - 5) {
+			const ellipsisLi = document.createElement('li');
+			ellipsisLi.className = 'page-item disabled';
+			const ellipsisLink = document.createElement('a');
+			ellipsisLink.className = 'page-link';
+			ellipsisLink.textContent = '...';
+			ellipsisLi.appendChild(ellipsisLink);
+			ul.appendChild(ellipsisLi);
+
+			const lastLi = document.createElement('li');
+			lastLi.className = 'page-item';
+			const lastLink = document.createElement('a');
+			lastLink.className = 'page-link';
+			lastLink.href = 'javascript:void(0)';
+			lastLink.onclick = () => setActivePage(totalPages);
+			lastLink.textContent = totalPages.toString();
+			lastLi.appendChild(lastLink);
+			ul.appendChild(lastLi);
+		}
+
+		const nextLi = document.createElement('li');
+		nextLi.className = currentPage < totalPages ? 'page-item' : 'page-item disabled';
+		const nextLink = document.createElement('a');
+		nextLink.className = 'page-link';
+		nextLink.href = 'javascript:void(0)';
+		nextLink.textContent = 'Next';
+		nextLink.onclick = currentPage < totalPages ? () => setActivePage(currentPage + 1) : null;
+		nextLi.appendChild(nextLink);
+		ul.appendChild(nextLi);
+
+		paginationElement.appendChild(ul);
+	}
+
+	var table = $('#zero_config').DataTable({
+		paging: false, // Enable paging
+		searching: false, // Disable search
+		lengthChange: true, // Disable length change
+		ordering: true, // Disable automatic ordering
+		responsive: true,
+		language: {
+			info: "",
+		}
+	});
+
+</script>
+
+@section css {
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/css/spinner.css" rel="stylesheet" />
+}
+
+@section script {
+	<!-- form js -->
+	<!-- this page js -->
+	<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+	<script src="../../dist/js/custom.min.js"></script>
+
+	<script>
+		// /*datwpicker*/
+		jQuery('.datepicker-autoclose').datepicker({
+			autoclose: true,
+			todayHighlight: true,
+			orientation: 'bottom'
+		});
+
+		// Tạo hàm dùng chung để xử lý sự kiện change cho cả fromDate và toDate
+		function handleDateChange() {
+			var startDate = $("#fromDate").val();
+			var endDate = $("#toDate").val();
+
+			// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+			if (!startDate || !endDate) {
+				alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+				return; // Dừng xử lý nếu không chọn đủ hai ngày
+			}
+			$("#loading-spinner").show();
+
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/GeneralReport/VinamGLJournalCombined", // Đường dẫn đến action trong controller
+				type: "GET",
+				data: {
+					fromDate: startDate,
+					toDate: endDate
+				},
+				success: function (result) {
+					$("#loading-spinner").hide();
+					console.log(result); // Xử lý kết quả trả về từ server
+					dataJson = JSON.parse(result);
+					currentPage = 1; // Đặt lại trang hiện tại về 1
+					renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+					renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+				},
+				error: function (error) {
+					console.error("Đã xảy ra lỗi khi gửi yêu cầu:", error);
+				}
+			});
+		}
+		// Sử dụng sự kiện changeDate của bootstrap-datepicker
+		$('#fromDate').datepicker().on('changeDate', handleDateChange);
+		$('#toDate').datepicker().on('changeDate', handleDateChange);
+
+		var table = $('#zero_config').DataTable({
+			paging: false, // Enable paging
+			searching: false, // Disable search
+			lengthChange: true, // Disable length change
+			ordering: true, // Disable automatic ordering
+			responsive: true,
+			language: {
+				info: "",
+			}
+		});
+
+
+
+		document.getElementById('export-button').addEventListener('click', function () {
+			var startDate = $("#fromDate").val();
+			var endDate = $("#toDate").val();
+
+			// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+			if (!startDate || !endDate) {
+				alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+				return; // Dừng xử lý nếu không chọn đủ hai ngày
+			}
+
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/GeneralReport/ExportVinamGLJournalCombined", // Đường dẫn đến action trong controller
+				type: "POST",
+				data: {
+					fromDate: startDate,
+					toDate: endDate
+				},
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (data) {
+					var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#export-button").prop("disabled", false);
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
+					link.download = 'ExportVinamGLJournalCombined.xlsx'; // Đặt tên file Excel
+					link.style.display = 'none';
+
+					document.body.appendChild(link);
+					link.click();
+
+					window.URL.revokeObjectURL(link.href);
+					document.body.removeChild(link);
+				}
+			});
+		});
+
+
+		document.addEventListener('DOMContentLoaded', function () {
+			// Chặn phím Enter cho form có id là 'export-form'
+			const form = document.getElementById('export-form');
+			form.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter') {
+					event.preventDefault(); // Ngăn chặn hành động mặc định
+					return false;
+				}
+			});
+		});
+
+	</script>
+}
