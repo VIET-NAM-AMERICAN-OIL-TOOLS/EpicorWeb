@@ -1,17 +1,17 @@
 ﻿@model int
 @{
-    ViewData["Title"] = "Price List";
+    ViewData["Title"] = "Customer Price List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="page-wrapper" style="background-color:#ffffff">
     <div class="col-md-6 mt-3 ms-3">
-                    <h4 class="card-title pb-4">Vinam Price List</h4>
+                    <h4 class="card-title pb-4">Vinam Customer Price List</h4>
                     <hr />
                 </div>
     <div class="card col-md-4 m-4">
         <div class="d-grid gap-3 col-12 mx-auto">
-            <button type="button" class="btn btn-secondary w-50 p-3 text-uppercase" onclick="exportExcel()">Export Excel</button>
+            <button type="button" class="btn btn-secondary w-50 p-3 text-uppercase" onclick="exportExcel()">Export Excel CSPL</button>
             @* <button type="button" class="btn btn-secondary w-50 p-3 text-uppercase" onclick="ImportExcel()">Import Excel</button> *@
             <h1>Import Excel</h1>
             @* <p id="insertMessage" class="hidden">Đã insert được @Model dòng.</p> *@
