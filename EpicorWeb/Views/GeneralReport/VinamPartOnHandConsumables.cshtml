@@ -19,211 +19,200 @@
 
 <div class="page-wrapper" style="background-color:#ffffff">
 	<div class="card">
-		<form action="~/GeneralReport/ExportVinamPartList" method="post" enctype="multipart/form-data">
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-6">
-						<h4 class="card-title pb-4">**Vinam Part On Hand Consumables</h4>
-					</div>
-					<div class="col-md-6 text-end">
-						@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
-						<div id="resultMessage" style="color: green;"></div>
-					</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<h4 class="card-title pb-4">**Vinam Part On Hand Consumables</h4>
 				</div>
-				<div class="border-top">
-					<div class="card-body">
-						<h4 class="card-title">Quantity on hand</h4>
-						<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
-								id="export-button" name="export-button">
-							Xuất Excel
-						</button>
-					</div>
-				</div>
-				<div class="table-responsive">
-					<div class="row">
-						<div class="col-sm-6 col-md-3">
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="show">Show</span>
-								</div>
-								<select id="pageSizeSelect" class="form-select" aria-label="Default select example" aria-describedby="show">
-									<option value="20" selected>20</option>
-									<option value="50">50</option>
-									<option value="100">100</option>
-									@* <option value="-1">All</option> *@
-								</select>
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="show">entries</span>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-3">
-						</div>
-						<div class="col-sm-6 col-md-6">
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="basic-addon1">Search</span>
-								</div>
-								<input type="text" class="form-control" id="searchText" placeholder="Tìm kiếm" aria-label="Search" aria-describedby="basic-addon1">
-							</div>
-						</div>
-					</div>
-
-					<div class="row">
-						<nav class="col-12" aria-label="Page navigation example" id="pagination">
-							<ul class="pagination">
-
-								@if (CurrentPage > 1)
-								{
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0)" tabindex="" onclick="changePage(@(CurrentPage - 1))">Previous</a>
-									</li>
-								}
-								else
-								{
-									<li class="page-item disabled">
-										<a class="page-link" href="#">Previous</a>
-									</li>
-								}
-
-								<!-- Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại -->
-								@if (CurrentPage > 6)
-								{
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(1)">1</a>
-									</li>
-									<li class="page-item disabled">
-										<a class="page-link" href="#">...</a>
-									</li>
-								}
-
-								<!-- Hiển thị 5 trang trước và 5 trang sau trang hiện tại -->
-								@for (int i = Math.Max(1, CurrentPage - 5); i <= Math.Min(totalPages, CurrentPage + 5); i++)
-								{
-									if (i == CurrentPage)
-									{
-										<li class="page-item active">
-											<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
-										</li>
-									}
-									else
-									{
-										<li class="page-item">
-											<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
-										</li>
-									}
-								}
-
-								<!-- Hiển thị trang cuối cùng nếu không nằm trong dãy gần trang hiện tại -->
-								@if (CurrentPage < totalPages - 5)
-								{
-									<li class="page-item disabled">
-										<a class="page-link" href="#">...</a>
-									</li>
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@totalPages)">@totalPages</a>
-									</li>
-								}
-
-								<!-- Nút 'Next' -->
-								@if (CurrentPage < totalPages)
-								{
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@(CurrentPage + 1))">Next</a>
-									</li>
-								}
-								else
-								{
-									<li class="page-item disabled">
-										<a class="page-link" href="#">Next</a>
-									</li>
-								}
-							</ul>
-						</nav>
-					</div>
-					<table id="zero_config" class="table table-striped table-bordered">
-						<thead>
-							<tr>
-								<th>Company</th>
-								<th>Part Num</th>
-								<th>Warehouse Code</th>
-								<th>Bin Num</th>
-								<th>Onhand Qty</th>
-								<th>Lot Num</th>
-								<th>PONum</th>
-								<th>POLine</th>
-								<th>PORel Num</th>
-								<th>Line Description</th>
-								<th>Order Qty</th>
-								<th>IUM</th>
-								<th>Unit Cost</th>
-								<th>Doc Unit Cost</th>
-							</tr>
-						</thead>
-						@if (paginatedModel != null && paginatedModel.Any())
-						{
-							<tbody id="data-body">
-								@foreach (var inv in paginatedModel)
-								{
-									<tr>
-										<td>@Html.DisplayFor(modelItem => inv.Company)</td>
-										<td>@Html.DisplayFor(modelItem => inv.PartNum)</td>
-										<td>@Html.DisplayFor(modelItem => inv.WarehouseCode)</td>
-										<td>@Html.DisplayFor(modelItem => inv.BinNum)</td>
-										<td>@Html.DisplayFor(modelItem => inv.OnhandQty)</td>
-										<td>@Html.DisplayFor(modelItem => inv.LotNum)</td>
-										<td>@Html.DisplayFor(modelItem => inv.PONum)</td>
-										<td>@Html.DisplayFor(modelItem => inv.POLine)</td>
-										<td>@Html.DisplayFor(modelItem => inv.PORel_PORelNum)</td>
-										<td>@Html.DisplayFor(modelItem => inv.LineDesc)</td>
-										<td>@Html.DisplayFor(modelItem => inv.OrderQty)</td>
-										<td>@Html.DisplayFor(modelItem => inv.IUM)</td>
-										<td>@Html.DisplayFor(modelItem => inv.UnitCost)</td>
-										<td>@Html.DisplayFor(modelItem => inv.DocUnitCost)</td>
-									</tr>
-								}
-							</tbody>
-						}
-						else
-						{
-							<tr>
-								<td colspan="14">No records found.</td>
-							</tr>
-						}
-					</table>
+				<div class="col-md-6 text-end">
+					@* <button type="button" class="btn btn-success btn-lg text-white" id="btnUpdateUsers">Cập nhật</button> *@
+					<div id="resultMessage" style="color: green;"></div>
 				</div>
 			</div>
-		</form>
+			<div class="border-top">
+				<div class="card-body">
+					<h4 class="card-title">Quantity on hand</h4>
+					<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;"
+							id="export-button" name="export-button">
+						Xuất Excel
+					</button>
+				</div>
+			</div>
+			<div class="table-responsive">
+				<div class="row">
+					<div class="col-sm-6 col-md-3">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="show">Show</span>
+							</div>
+							<select id="pageSizeSelect" class="form-select" aria-label="Default select example" aria-describedby="show">
+								<option value="20" selected>20</option>
+								<option value="50">50</option>
+								<option value="100">100</option>
+								@* <option value="-1">All</option> *@
+							</select>
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="show">entries</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3">
+					</div>
+					<div class="col-sm-6 col-md-6">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="basic-addon1">Search</span>
+							</div>
+							<input type="text" class="form-control" id="searchText" placeholder="Tìm kiếm" aria-label="Search" aria-describedby="basic-addon1">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<nav class="col-12" aria-label="Page navigation example" id="pagination">
+						<ul class="pagination">
+
+							@if (CurrentPage > 1)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" tabindex="" onclick="changePage(@(CurrentPage - 1))">Previous</a>
+								</li>
+							}
+							else
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">Previous</a>
+								</li>
+							}
+
+							<!-- Hiển thị trang đầu tiên nếu không nằm trong dãy gần trang hiện tại -->
+							@if (CurrentPage > 6)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(1)">1</a>
+								</li>
+								<li class="page-item disabled">
+									<a class="page-link" href="#">...</a>
+								</li>
+							}
+
+							<!-- Hiển thị 5 trang trước và 5 trang sau trang hiện tại -->
+							@for (int i = Math.Max(1, CurrentPage - 5); i <= Math.Min(totalPages, CurrentPage + 5); i++)
+							{
+								if (i == CurrentPage)
+								{
+									<li class="page-item active">
+										<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+									</li>
+								}
+								else
+								{
+									<li class="page-item">
+										<a class="page-link" href="javascript:void(0)" name=@("currentPage" + i) onclick="setActivePage(@i)">@i</a>
+									</li>
+								}
+							}
+
+							<!-- Hiển thị trang cuối cùng nếu không nằm trong dãy gần trang hiện tại -->
+							@if (CurrentPage < totalPages - 5)
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">...</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@totalPages)">@totalPages</a>
+								</li>
+							}
+
+							<!-- Nút 'Next' -->
+							@if (CurrentPage < totalPages)
+							{
+								<li class="page-item">
+									<a class="page-link" href="javascript:void(0)" onclick="setActivePage(@(CurrentPage + 1))">Next</a>
+								</li>
+							}
+							else
+							{
+								<li class="page-item disabled">
+									<a class="page-link" href="#">Next</a>
+								</li>
+							}
+						</ul>
+					</nav>
+				</div>
+				<table id="zero_config" class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>Company</th>
+							<th>Part Num</th>
+							<th>Warehouse Code</th>
+							<th>Bin Num</th>
+							<th>Onhand Qty</th>
+							<th>Lot Num</th>
+							<th>PONum</th>
+							<th>POLine</th>
+							<th>PORel Num</th>
+							<th>Line Description</th>
+							<th>Order Qty</th>
+							<th>IUM</th>
+							<th>Unit Cost</th>
+							<th>Doc Unit Cost</th>
+						</tr>
+					</thead>
+					@if (paginatedModel != null && paginatedModel.Any())
+					{
+						<tbody id="data-body">
+							@foreach (var inv in paginatedModel)
+							{
+								<tr>
+									<td>@Html.DisplayFor(modelItem => inv.Company)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PartNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.WarehouseCode)</td>
+									<td>@Html.DisplayFor(modelItem => inv.BinNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.OnhandQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.LotNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PONum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.POLine)</td>
+									<td>@Html.DisplayFor(modelItem => inv.PORel_PORelNum)</td>
+									<td>@Html.DisplayFor(modelItem => inv.LineDesc)</td>
+									<td>@Html.DisplayFor(modelItem => inv.OrderQty)</td>
+									<td>@Html.DisplayFor(modelItem => inv.IUM)</td>
+									<td>@Html.DisplayFor(modelItem => inv.UnitCost)</td>
+									<td>@Html.DisplayFor(modelItem => inv.DocUnitCost)</td>
+								</tr>
+							}
+						</tbody>
+					}
+					else
+					{
+						<tr>
+							<td colspan="14">No records found.</td>
+						</tr>
+					}
+				</table>
+			</div>
+		</div>
 	</div>
 </div>
 <div id="myModalContainer"></div>
 
-<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
-<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
-<!-- this page js -->
-<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
-<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
-<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
-<link href="~/css/spinner.css" rel="stylesheet" />
-<script src="../../dist/js/custom.min.js"></script>
+<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
+
 
 <script>
-
 	// Chuyển dữ liệu từ server vào biến JavaScript
-	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model)); 
+	let data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
 	let currentPage = @CurrentPage;
 	let pageSize = @PageSize;
 	let textSearch = "";
-	document.addEventListener('DOMContentLoaded', function () {
-		// Chặn phím Enter cho form có id là 'export-form'
-		const form = document.getElementById('export-form');
-		form.addEventListener('keydown', function (event) {
-			if (event.key === 'Enter') {
-				event.preventDefault(); // Ngăn chặn hành động mặc định
-			}
-		});
-	});
+	let debounceTimeout;
+
 	function filterData(data, searchText) {
 		return data.filter(item => {
 			const PartNum = (item.PartNum || "").toLowerCase().includes(searchText.toLowerCase());
@@ -242,64 +231,34 @@
 		tableBody.innerHTML = ''; // Xóa nội dung hiện tại
 		const filteredData = filterData(data, textSearch);
 		const paginatedItems = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-
 		paginatedItems.forEach(item => {
 			tableBody.innerHTML += `
-				<tr>
-
-					<td>${item.Company || ''}</td>
-					<td>${item.PartNum || ''}</td>
-					<td>${item.WarehouseCode || ''}</td>
-					<td>${item.BinNum || ''}</td>
-					<td>${item.OnhandQty || ''}</td>
-					<td>${item.LotNum || ''}</td>
-					<td>${item.PONum || ''}</td>
-					<td>${item.POLine || ''}</td>
-					<td>${item.PORel_PORelNum || ''}</td>
-					<td>${item.LineDesc || ''}</td>
-					<td>${item.OrderQty || '' || ''}</td>
-					<td>${item.IUM || '' || ''}</td>
-					<td>${item.UnitCost || ''}</td>
-					<td>${item.DocUnitCost || ''}</td>
-
-				</tr>
-				`;
+			<tr>
+				<td>${item.Company || ''}</td>
+				<td>${item.PartNum || ''}</td>
+				<td>${item.WarehouseCode || ''}</td>
+				<td>${item.BinNum || ''}</td>
+				<td>${item.OnhandQty || ''}</td>
+				<td>${item.LotNum || ''}</td>
+				<td>${item.PONum || ''}</td>
+				<td>${item.POLine || ''}</td>
+				<td>${item.PORel_PORelNum || ''}</td>
+				<td>${item.LineDesc || ''}</td>
+				<td>${item.OrderQty || '' || ''}</td>
+				<td>${item.IUM || '' || ''}</td>
+				<td>${item.UnitCost || ''}</td>
+				<td>${item.DocUnitCost || ''}</td>
+			</tr>
+						`;
 		});
 	}
 
-	document.getElementById('pageSizeSelect').addEventListener('change', function () {
-		pageSize = parseInt(this.value);
-		currentPage = 1; // Đặt lại trang hiện tại về 1
-		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-	});
 	function setActivePage(page) {
 		currentPage = page; // Cập nhật trang hiện tại
 		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
 		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
 	}
-	let debounceTimeout;
 
-	document.getElementById('searchText').addEventListener('input', function () {
-		clearTimeout(debounceTimeout);
-		textSearch = this.value;
-		debounceTimeout = setTimeout(() => {
-			currentPage = 1;
-			renderTable(pageSize, currentPage);
-			renderPagging(pageSize, currentPage);
-		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
-	});
-
-	// Cập nhật giá trị pageSize khi thay đổi
-	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
-		element.addEventListener('click', function () {
-			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
-			console.log(currentPage);
-			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-		});
-	});
 	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
 	renderTable(pageSize, currentPage);
 
@@ -396,6 +355,48 @@
 
 		paginationElement.appendChild(ul);
 	}
+
+</script>
+
+<script>
+
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+</script>
+
+<script>
+	document.getElementById('searchText').addEventListener('input', function () {
+		clearTimeout(debounceTimeout);
+		textSearch = this.value;
+		debounceTimeout = setTimeout(() => {
+			currentPage = 1;
+			renderTable(pageSize, currentPage);
+			renderPagging(pageSize, currentPage);
+		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+	});
+</script>
+
+
+<script>
+
+
+	// Cập nhật giá trị pageSize khi thay đổi
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			console.log(currentPage);
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
+	});
+</script>
+
+
+<script>
 	var table = $('#zero_config').DataTable({
 		paging: false, // Enable paging
 		searching: false, // Disable search
@@ -407,22 +408,49 @@
 		}
 	});
 </script>
+<script>
+	document.getElementById('export-button').addEventListener('click', function () {
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/ExportVinamPartOnHandConsumalbes", // Đường dẫn đến action trong controller
+			type: "POST",
+			// data: {
+			// 	fromDate: startDate,
+			// 	toDate: endDate
+			// },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (data) {
+				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#export-button").prop("disabled", false);
+				var link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = 'ExportVinamPartOnHandConsumalbes.xlsx'; // Đặt tên file Excel
+				link.style.display = 'none';
 
-@section css {
-	<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
-	<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-	<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
-}
+				document.body.appendChild(link);
+				link.click();
+
+				window.URL.revokeObjectURL(link.href);
+				document.body.removeChild(link);
+			}
+		});
+	});
+</script>
 
 
 @section script {
-	<!-- form js -->
-	<!-- this page js -->
-	<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
-	<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
-	<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
-	<link href="~/css/spinner.css" rel="stylesheet" />
-	<script src="../../dist/js/custom.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+	<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
 
 	<script>
 
@@ -436,62 +464,92 @@
 				info: "",
 			}
 		});
-
-
 	</script>
 
 	<script>
-		$(document).ready(function () {
-			$("form").submit(function (e) {
-				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
 
-				// Hiển thị hiệu ứng chờ
-				$("#loading-spinner").show();
-				// Vô hiệu hóa button
-				$("#export-button").prop("disabled", true);
+		document.getElementById('export-button').addEventListener('click', function () {
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/GeneralReport/ExportVinamPartOnHandConsumalbes", // Đường dẫn đến action trong controller
+				type: "POST",
+				// data: {
+				// 	fromDate: startDate,
+				// 	toDate: endDate
+				// },
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (data) {
+					var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#export-button").prop("disabled", false);
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
+					link.download = 'ExportVinamPartOnHandConsumalbes.xlsx'; // Đặt tên file Excel
+					link.style.display = 'none';
 
-				// Gửi dữ liệu bằng Ajax đến controller
-				$.ajax({
-					url: "/GeneralReport/ExportVinamPartOnHandConsumalbes", // Đường dẫn đến action trong controller
-					type: "POST",
-					// data: {
-					// 	fromDate: startDate,
-					// 	toDate: endDate
-					// },
-					xhrFields: {
-						responseType: 'blob'
-					},
-					success: function (data) {
-						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-						$("#loading-spinner").hide();
-						// Kích hoạt lại button
-						$("#export-button").prop("disabled", false);
-						var link = document.createElement('a');
-						link.href = window.URL.createObjectURL(blob);
-						link.download = 'VinamPartOnHandConsumalbes.xlsx'; // Đặt tên file Excel
-						link.style.display = 'none';
+					document.body.appendChild(link);
+					link.click();
 
-						document.body.appendChild(link);
-						link.click();
-
-						window.URL.revokeObjectURL(link.href);
-						document.body.removeChild(link);
-					}
-				});
-			});
-		});
-	</script>
-
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			// Chặn phím Enter cho form có id là 'export-form'
-			const form = document.getElementById('export-form');
-			form.addEventListener('keydown', function (event) {
-				if (event.key === 'Enter') {
-					event.preventDefault(); // Ngăn chặn hành động mặc định
+					window.URL.revokeObjectURL(link.href);
+					document.body.removeChild(link);
 				}
 			});
 		});
+		// $(document).ready(function () {
+		// 	$("form").submit(function (e) {
+		// 		e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+		// 		// Hiển thị hiệu ứng chờ
+		// 		$("#loading-spinner").show();
+		// 		// Vô hiệu hóa button
+		// 		$("#export-button").prop("disabled", true);
+
+		// 		// Gửi dữ liệu bằng Ajax đến controller
+		// 		$.ajax({
+		// 			url: "/GeneralReport/ExportVinamPartOnHandConsumalbes", // Đường dẫn đến action trong controller
+		// 			type: "POST",
+		// 			// data: {
+		// 			// 	fromDate: startDate,
+		// 			// 	toDate: endDate
+		// 			// },
+		// 			xhrFields: {
+		// 				responseType: 'blob'
+		// 			},
+		// 			success: function (data) {
+		// 				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+		// 				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+		// 				$("#loading-spinner").hide();
+		// 				// Kích hoạt lại button
+		// 				$("#export-button").prop("disabled", false);
+		// 				var link = document.createElement('a');
+		// 				link.href = window.URL.createObjectURL(blob);
+		// 				link.download = 'VinamPartOnHandConsumalbes.xlsx'; // Đặt tên file Excel
+		// 				link.style.display = 'none';
+
+		// 				document.body.appendChild(link);
+		// 				link.click();
+
+		// 				window.URL.revokeObjectURL(link.href);
+		// 				document.body.removeChild(link);
+		// 			}
+		// 		});
+		// 	});
+		// });
 	</script>
+
+		// <script>
+			  // 	document.addEventListener('DOMContentLoaded', function () {
+			  // 		// Chặn phím Enter cho form có id là 'export-form'
+			  // 		const form = document.getElementById('export-form');
+			  // 		form.addEventListener('keydown', function (event) {
+			  // 			if (event.key === 'Enter') {
+			  // 				event.preventDefault(); // Ngăn chặn hành động mặc định
+			  // 			}
+			  // 		});
+			  // 	});
+			  // </script>
 }

@@ -1,13 +1,10 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using EpicorWeb.Common;
+﻿using EpicorWeb.Common;
 using EpicorWeb.DAO;
 using EpicorWeb.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Data;
-using System.Drawing.Printing;
 
 namespace EpicorWeb.Controllers.Report
 {
@@ -115,6 +112,19 @@ namespace EpicorWeb.Controllers.Report
 			return firstLoad ? View(data) : Json(JsonConvert.SerializeObject(data));
 		}
 
+		[HttpGet]
+		[Route("/GeneralReport/VinamSalesInvoiceList")]
+		public IActionResult VinamSalesInvoiceList(int year = 0, int month = 0)
+		{
+			string query = "exec SPD_GeneralReport_VinamSalesInvoiceList";
+			DataTable data = new DataProviderLocal().ExecuteQuery(query);
+			var filteredData = data.AsEnumerable()
+							.Where(row => (row.Field<DateTime>("ReportDate").Year == year || year == 0) &&
+										  (row.Field<DateTime>("ReportDate").Month == month || month == 0))
+							.OrderBy(row => row.Field<string>("DataCharacter"));
+			//order by PatchFld.DataCharacter
+			return View(filteredData.CopyToDataTable());
+		}
 
 		[HttpPost]
 		[Route("/GeneralReport/ExportVinamPartList")]
@@ -216,5 +226,22 @@ namespace EpicorWeb.Controllers.Report
 			return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		}
 
+		[HttpPost]
+		[Route("/GeneralReport/ExportVinamSalesInvoiceList")]
+		public IActionResult ExportVinamSalesInvoiceList(int year, int month)
+		{
+			string query = "exec SPD_GeneralReport_VinamSalesInvoiceList";
+			DataTable data = new DataProviderLocal().ExecuteQuery(query);
+
+			var filteredData = data.AsEnumerable()
+				.Where(row => (row.Field<DateTime>("ReportDate").Year == year || year == 0) &&
+							  (row.Field<DateTime>("ReportDate").Month == month || month == 0))
+				.OrderBy(row => row.Field<string>("DataCharacter"));
+
+			//order by PatchFld.DataCharacter
+			var fileContents = Commonsetup.ExportDataTableToExcel(filteredData.CopyToDataTable(), "VinamSalesInvoiceList");
+			// Trả về tệp tin Excel
+			return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		}
 	}
 }

@@ -31,7 +31,6 @@
 	</div>
 </div>
 <div id="myModalContainer">
-
 </div>
 
 <link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
@@ -59,6 +58,10 @@
 		});
 	}
 
+
+</script>
+
+<script>
 	var table = $('#zero_config').DataTable({
 		"language": {
 			"paginate": {
@@ -67,48 +70,76 @@
 			}
 		}
 	});
-	table.ajax.re
 	table.on('draw.dt', function () {
 		initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
 	});
 </script>
 
 <script>
-	$(document).ready(function () {
-		$("form").submit(function (e) {
-			e.preventDefault(); // Ngăn c
-			// Sự kiện khi nút "Xuất Excel Mới" được nhấp
-			$("#btnUpdateUsers").click(function () {
+	document.getElementById('btnUpdateUsers').addEventListener('click', function () {
 
-				// Hiển thị hiệu ứng chờ
-				$("#loading-spinner").show();
-				// Vô hiệu hóa button
-				$("#btnUpdateUsers").prop("disabled", true);
+		// Hiển thị hiệu ứng chờ
+		$("#loading-spinner").show();
+		// Vô hiệu hóa button
+		$("#btnUpdateUsers").prop("disabled", true);
 
-				// Gửi dữ liệu bằng Ajax đến controller
-				$.ajax({
-					url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
-					type: "POST",
-					success: function (data) {
-						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-						$("#loading-spinner").hide();
-						// Kích hoạt lại button
-						$("#btnUpdateUsers").prop("disabled", false);
-						// Xử lý kết quả từ controller
-						$("#resultMessage").text("Update được " + data + " dòng.");
-					},
-					error: function () {
-						// Ẩn hiệu ứng chờ nếu có lỗi
-						$("#loading-spinner").hide();
-						// Kích hoạt lại button
-						$("#btnUpdateUsers").prop("disabled", false);
-						//-------------------------------------------------------
-						$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
-					}
-				});
-			});
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+			type: "POST",
+			success: function (data) {
+				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#btnUpdateUsers").prop("disabled", false);
+				// Xử lý kết quả từ controller
+				$("#resultMessage").text("Update được " + data + " dòng.");
+			},
+			error: function () {
+				// Ẩn hiệu ứng chờ nếu có lỗi
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#btnUpdateUsers").prop("disabled", false);
+				//-------------------------------------------------------
+				$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+			}
 		});
 	});
+	// $(document).ready(function () {
+	// 	$("form").submit(function (e) {
+	// 		e.preventDefault(); // Ngăn c
+	// 		// Sự kiện khi nút "Xuất Excel Mới" được nhấp
+	// 		$("#btnUpdateUsers").click(function () {
+
+	// 			// Hiển thị hiệu ứng chờ
+	// 			$("#loading-spinner").show();
+	// 			// Vô hiệu hóa button
+	// 			$("#btnUpdateUsers").prop("disabled", true);
+
+	// 			// Gửi dữ liệu bằng Ajax đến controller
+	// 			$.ajax({
+	// 				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+	// 				type: "POST",
+	// 				success: function (data) {
+	// 					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+	// 					$("#loading-spinner").hide();
+	// 					// Kích hoạt lại button
+	// 					$("#btnUpdateUsers").prop("disabled", false);
+	// 					// Xử lý kết quả từ controller
+	// 					$("#resultMessage").text("Update được " + data + " dòng.");
+	// 				},
+	// 				error: function () {
+	// 					// Ẩn hiệu ứng chờ nếu có lỗi
+	// 					$("#loading-spinner").hide();
+	// 					// Kích hoạt lại button
+	// 					$("#btnUpdateUsers").prop("disabled", false);
+	// 					//-------------------------------------------------------
+	// 					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+	// 				}
+	// 			});
+	// 		});
+	// 	});
+	// });
 </script>
 
 <script>
@@ -182,41 +213,71 @@
 	</script>
 
 	<script>
-		$(document).ready(function () {
-			$("form").submit(function (e) {
-				e.preventDefault(); // Ngăn c
-				// Sự kiện khi nút "Xuất Excel Mới" được nhấp
-				$("#btnUpdateUsers").click(function () {
 
-					// Hiển thị hiệu ứng chờ
-					$("#loading-spinner").show();
-					// Vô hiệu hóa button
-					$("#btnUpdateUsers").prop("disabled", true);
+		document.getElementById('btnUpdateUsers').addEventListener('click', function () {
 
-					// Gửi dữ liệu bằng Ajax đến controller
-					$.ajax({
-						url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
-						type: "POST",
-						success: function (data) {
-							// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-							$("#loading-spinner").hide();
-							// Kích hoạt lại button
-							$("#btnUpdateUsers").prop("disabled", false);
-							// Xử lý kết quả từ controller
-							$("#resultMessage").text("Update được " + data + " dòng.");
-						},
-						error: function () {
-							// Ẩn hiệu ứng chờ nếu có lỗi
-							$("#loading-spinner").hide();
-							// Kích hoạt lại button
-							$("#btnUpdateUsers").prop("disabled", false);
-							//-------------------------------------------------------
-							$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
-						}
-					});
-				});
-			})
+			// Hiển thị hiệu ứng chờ
+			$("#loading-spinner").show();
+			// Vô hiệu hóa button
+			$("#btnUpdateUsers").prop("disabled", true);
+
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+				type: "POST",
+				success: function (data) {
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#btnUpdateUsers").prop("disabled", false);
+					// Xử lý kết quả từ controller
+					$("#resultMessage").text("Update được " + data + " dòng.");
+				},
+				error: function () {
+					// Ẩn hiệu ứng chờ nếu có lỗi
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#btnUpdateUsers").prop("disabled", false);
+					//-------------------------------------------------------
+					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+				}
+			});
 		});
+		// $(document).ready(function () {
+		// 	$("form").submit(function (e) {
+		// 		e.preventDefault(); // Ngăn c
+		// 		// Sự kiện khi nút "Xuất Excel Mới" được nhấp
+		// 		$("#btnUpdateUsers").click(function () {
+
+		// 			// Hiển thị hiệu ứng chờ
+		// 			$("#loading-spinner").show();
+		// 			// Vô hiệu hóa button
+		// 			$("#btnUpdateUsers").prop("disabled", true);
+
+		// 			// Gửi dữ liệu bằng Ajax đến controller
+		// 			$.ajax({
+		// 				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+		// 				type: "POST",
+		// 				success: function (data) {
+		// 					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+		// 					$("#loading-spinner").hide();
+		// 					// Kích hoạt lại button
+		// 					$("#btnUpdateUsers").prop("disabled", false);
+		// 					// Xử lý kết quả từ controller
+		// 					$("#resultMessage").text("Update được " + data + " dòng.");
+		// 				},
+		// 				error: function () {
+		// 					// Ẩn hiệu ứng chờ nếu có lỗi
+		// 					$("#loading-spinner").hide();
+		// 					// Kích hoạt lại button
+		// 					$("#btnUpdateUsers").prop("disabled", false);
+		// 					//-------------------------------------------------------
+		// 					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+		// 				}
+		// 			});
+		// 		});
+		// 	})
+		// });
 	</script>
 
 	<script>

@@ -332,75 +332,25 @@
 <link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
 <link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
 <link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
 
-<link href="~/css/spinner.css" rel="stylesheet" />
-
-<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
 <script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-<script src="../../dist/js/custom.min.js"></script>
+<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
+
 <script>
-	// Chuyển dữ liệu từ server vào biến JavaScript
-	let dataJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
-	let currentPage = @CurrentPage;
-	let pageSize = @PageSize;
-	let textSearch = "";
 
 	jQuery('.datepicker-autoclose').datepicker({
 		autoclose: true,
 		todayHighlight: true,
 		orientation: 'bottom'
 	});
-	// Tạo hàm dùng chung để xử lý sự kiện change cho cả fromDate và toDate
-	function handleDateChange() {
-		var startDate = $("#fromDate").val();
-		var endDate = $("#toDate").val();
-
-		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
-		if (!startDate || !endDate) {
-			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
-			return; // Dừng xử lý nếu không chọn đủ hai ngày
-		}
-		$("#loading-spinner").show();
-
-		// Gửi dữ liệu bằng Ajax đến controller
-		$.ajax({
-			url: "/GeneralReport/VinamGLJournalCombined", // Đường dẫn đến action trong controller
-			type: "GET",
-			data: {
-				fromDate: startDate,
-				toDate: endDate
-			},
-			success: function (result) {
-				console.log(result); // Xử lý kết quả trả về từ server
-				$("#loading-spinner").hide();
-
-				dataJson = JSON.parse(result);
-				currentPage = 1; // Đặt lại trang hiện tại về 1
-				renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-				renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-
-
-			},
-			error: function (error) {
-				console.error("Đã xảy ra lỗi khi gửi yêu cầu:", error);
-			}
-		});
-	}
-	// Sử dụng sự kiện changeDate của bootstrap-datepicker
-	$('#fromDate').datepicker().on('changeDate', handleDateChange);
-	$('#toDate').datepicker().on('changeDate', handleDateChange);
-	document.addEventListener('DOMContentLoaded', function () {
-		// Chặn phím Enter cho form có id là 'export-form'
-		const form = document.getElementById('export-form');
-		form.addEventListener('keydown', function (event) {
-			if (event.key === 'Enter') {
-				event.preventDefault(); // Ngăn chặn hành động mặc định
-				return false;
-			}
-		});
-	});
-
-
+	// Chuyển dữ liệu từ server vào biến JavaScript
+	let dataJson = {};
+	dataJson = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model))
+	let currentPage = @CurrentPage;
+	let pageSize = @PageSize;
+	let textSearch = "";
+	let debounceTimeout;
 
 	function filterData(data, searchText) {
 		return data.filter(item => {
@@ -420,59 +370,59 @@
 		const paginatedItems = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 		paginatedItems.forEach(item => {
 			tableBody.innerHTML += `
-				<tr>
-					<td>${item.GLJrnDtl_Company || ''}</td>
-					<td>${item.GLJrnDtl_COACode || ''}</td>
-					<td>${item.GLJrnDtl_GroupID || ''}</td>
-					<td>${item.GLJrnDtl_PostedBy || ''}</td>
-					<td>${formatDate(item.GLJrnDtl_PostedDate, true) || ''}</td>
-					<td>${formatDate(item.GLJrnDtl_CreateDate) || ''}</td>
-					<td>${item.GLJrnDtl_Posted || ''}</td>
-					<td>${item.GLJrnDtl_SourceModule || ''}</td>
-					<td>${item.GLJrnDtl_FiscalYear || ''}</td>
-					<td>${item.GLJrnDtl_FiscalPeriod || ''}</td>
-					<td>${formatDate(item.GLJrnDtl_JEDate) || ''}</td>
-					<td>${item.GLJrnDtl_JournalCode || ''}</td>
-					<td>${item.GLJrnDtl_JournalNum || ''}</td>
-					<td>${item.GLJrnDtl_JournalLine || ''}</td>
-					<td>${item.Calculated_GLDesc || ''}</td>
-					<td>${item.GLJrnDtl_VNDescription_c || ''}</td>
-					<td>${item.GLJrnDtl_GLAccount || ''}</td>
-					<td>${item.GLJrnDtl_SegValue1 || ''}</td>
-					<td>${item.GLJrnDtl_SegValue2 || ''}</td>
-					<td>${item.COASegValues_SegmentName || ''}</td>
-					<td>${item.GLJrnDtl_SegValue3 || ''}</td>
-					<td>${item.GLJrnDtl_SegValue4 || ''}</td>
-					<td>${item.GLJrnDtl_SegValue5 || ''}</td>
-					<td>${item.GLJrnDtl_SegValue6 || ''}</td>
-					<td>${item.GLJrnDtl_SegValue7 || ''}</td>
-					<td>${item.GLJrnDtl1_GLAccount || ''}</td>
-					<td>${item.Calculated_DebitAmt || ''}</td>
-					<td>${item.Calculated_CreditAmt || ''}</td>
-					<td>${item.Calculated_BookDebit || ''}</td>
-					<td>${item.Calculated_BookCredit || ''}</td>
-					<td>${item.GLJrnDtl_LegalNumber || ''}</td>
-					<td>${item.GLJrnDtl_BankAcctID || ''}</td>
-					<td>${item.BankAcct_Description || ''}</td>
-					<td>${item.Vendor_VendorID || ''}</td>
-					<td>${item.Vendor_Name || ''}</td>
-					<td>${item.Calculated_RcvLegal || ''}</td>
-					<td>${item.GLJrnDtl_APInvoiceNum || ''}</td>
-					<td>${item.APInvHed_LegalNumber || ''}</td>
-					<td>${item.APInvHed_ReportDate_c || ''}</td>
-					<td>${item.APInvDtl_Description || ''}</td>
-					<td>${item.GLJrnDtl_CheckNum || ''}</td>
-					<td>${item.Customer_CustID || ''}</td>
-					<td>${item.Customer_Name || ''}</td>
-					<td>${item.GLJrnDtl_ARInvoiceNum || ''}</td>
-					<td>${item.InvcHead_LegalNumber || ''}</td>
-					<td>${item.InvcHead_ReportDate_c || ''}</td>
-					<td>${item.CashHead_CheckRef || ''}</td>
-					<td>${item.AlcHistDtl_BatchID || ''}</td>
-					<td>${item.AlcHistDtl_AllocID || ''}</td>
-					<td>${item.GLJrnDtl_CurrencyCode || ''}</td>
-				</tr>
-			`;
+					<tr>
+						<td>${item.GLJrnDtl_Company || ''}</td>
+						<td>${item.GLJrnDtl_COACode || ''}</td>
+						<td>${item.GLJrnDtl_GroupID || ''}</td>
+						<td>${item.GLJrnDtl_PostedBy || ''}</td>
+						<td>${formatDate(item.GLJrnDtl_PostedDate, true) || ''}</td>
+						<td>${formatDate(item.GLJrnDtl_CreateDate) || ''}</td>
+						<td>${item.GLJrnDtl_Posted || ''}</td>
+						<td>${item.GLJrnDtl_SourceModule || ''}</td>
+						<td>${item.GLJrnDtl_FiscalYear || ''}</td>
+						<td>${item.GLJrnDtl_FiscalPeriod || ''}</td>
+						<td>${formatDate(item.GLJrnDtl_JEDate) || ''}</td>
+						<td>${item.GLJrnDtl_JournalCode || ''}</td>
+						<td>${item.GLJrnDtl_JournalNum || ''}</td>
+						<td>${item.GLJrnDtl_JournalLine || ''}</td>
+						<td>${item.Calculated_GLDesc || ''}</td>
+						<td>${item.GLJrnDtl_VNDescription_c || ''}</td>
+						<td>${item.GLJrnDtl_GLAccount || ''}</td>
+						<td>${item.GLJrnDtl_SegValue1 || ''}</td>
+						<td>${item.GLJrnDtl_SegValue2 || ''}</td>
+						<td>${item.COASegValues_SegmentName || ''}</td>
+						<td>${item.GLJrnDtl_SegValue3 || ''}</td>
+						<td>${item.GLJrnDtl_SegValue4 || ''}</td>
+						<td>${item.GLJrnDtl_SegValue5 || ''}</td>
+						<td>${item.GLJrnDtl_SegValue6 || ''}</td>
+						<td>${item.GLJrnDtl_SegValue7 || ''}</td>
+						<td>${item.GLJrnDtl1_GLAccount || ''}</td>
+						<td>${item.Calculated_DebitAmt || ''}</td>
+						<td>${item.Calculated_CreditAmt || ''}</td>
+						<td>${item.Calculated_BookDebit || ''}</td>
+						<td>${item.Calculated_BookCredit || ''}</td>
+						<td>${item.GLJrnDtl_LegalNumber || ''}</td>
+						<td>${item.GLJrnDtl_BankAcctID || ''}</td>
+						<td>${item.BankAcct_Description || ''}</td>
+						<td>${item.Vendor_VendorID || ''}</td>
+						<td>${item.Vendor_Name || ''}</td>
+						<td>${item.Calculated_RcvLegal || ''}</td>
+						<td>${item.GLJrnDtl_APInvoiceNum || ''}</td>
+						<td>${item.APInvHed_LegalNumber || ''}</td>
+						<td>${item.APInvHed_ReportDate_c || ''}</td>
+						<td>${item.APInvDtl_Description || ''}</td>
+						<td>${item.GLJrnDtl_CheckNum || ''}</td>
+						<td>${item.Customer_CustID || ''}</td>
+						<td>${item.Customer_Name || ''}</td>
+						<td>${item.GLJrnDtl_ARInvoiceNum || ''}</td>
+						<td>${item.InvcHead_LegalNumber || ''}</td>
+						<td>${item.InvcHead_ReportDate_c || ''}</td>
+						<td>${item.CashHead_CheckRef || ''}</td>
+						<td>${item.AlcHistDtl_BatchID || ''}</td>
+						<td>${item.AlcHistDtl_AllocID || ''}</td>
+						<td>${item.GLJrnDtl_CurrencyCode || ''}</td>
+					</tr>
+				`;
 		});
 	}
 	function formatDate(dateString, formatTime = false) {
@@ -501,82 +451,14 @@
 		// Trả về chuỗi định dạng dd-mm-yyyy hh:mm:ss
 		// return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 	}
-	document.getElementById('export-button').addEventListener('click', function () {
-
-		var startDate = $("#fromDate").val();
-		var endDate = $("#toDate").val();
-
-		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
-		if (!startDate || !endDate) {
-			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
-			return; // Dừng xử lý nếu không chọn đủ hai ngày
-		}
-
-		$("#loading-spinner").show();
-		// Gửi dữ liệu bằng Ajax đến controller
-		$.ajax({
-			url: "/GeneralReport/ExportVinamGLJournalCombined", // Đường dẫn đến action trong controller
-			type: "POST",
-			data: {
-				fromDate: startDate,
-				toDate: endDate
-			},
-			xhrFields: {
-				responseType: 'blob'
-			},
-			success: function (data) {
-				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-				$("#loading-spinner").hide();
-				// Kích hoạt lại button
-				$("#export-button").prop("disabled", false);
-				var link = document.createElement('a');
-				link.href = window.URL.createObjectURL(blob);
-				link.download = 'ExportVinamGLJournalCombined.xlsx'; // Đặt tên file Excel
-				link.style.display = 'none';
-
-				document.body.appendChild(link);
-				link.click();
-
-				window.URL.revokeObjectURL(link.href);
-				document.body.removeChild(link);
-			}
-		});
-	});
-
-
-	document.getElementById('pageSizeSelect').addEventListener('change', function () {
-		pageSize = parseInt(this.value);
-		currentPage = 1; // Đặt lại trang hiện tại về 1
-		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-	});
+	
 	function setActivePage(page) {
 		currentPage = page; // Cập nhật trang hiện tại
 		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
 		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
 	}
-	let debounceTimeout;
 
-	document.getElementById('searchText').addEventListener('input', function () {
-		clearTimeout(debounceTimeout);
-		textSearch = this.value;
-		debounceTimeout = setTimeout(() => {
-			currentPage = 1;
-			renderTable(pageSize, currentPage);
-			renderPagging(pageSize, currentPage);
-		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
-	});
-
-	// Cập nhật giá trị pageSize khi thay đổi
-	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
-		element.addEventListener('click', function () {
-			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
-			console.log(currentPage);
-			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-		});
-	});
+	
 	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
 	renderTable(pageSize, currentPage);
 
@@ -674,6 +556,49 @@
 		paginationElement.appendChild(ul);
 	}
 
+</script>
+<script>
+	// Tạo hàm dùng chung để xử lý sự kiện change cho cả fromDate và toDate
+	function handleDateChange() {
+		var startDate = $("#fromDate").val();
+		var endDate = $("#toDate").val();
+
+		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+		if (!startDate || !endDate) {
+			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+			return; // Dừng xử lý nếu không chọn đủ hai ngày
+		}
+		$("#loading-spinner").show();
+
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/VinamGLJournalCombined", // Đường dẫn đến action trong controller
+			type: "GET",
+			data: {
+				fromDate: startDate,
+				toDate: endDate
+			},
+			success: function (result) {
+				$("#loading-spinner").hide();
+				dataJson = JSON.parse(result);
+				currentPage = 1; // Đặt lại trang hiện tại về 1
+				renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+				renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+
+
+			},
+			error: function (error) {
+				console.error("Đã xảy ra lỗi khi gửi yêu cầu:", error);
+			}
+		});
+	}
+	// Sử dụng sự kiện changeDate của bootstrap-datepicker
+	$('#fromDate').datepicker().on('changeDate', handleDateChange);
+	$('#toDate').datepicker().on('changeDate', handleDateChange);
+</script>
+
+<script>
+
 	var table = $('#zero_config').DataTable({
 		paging: false, // Enable paging
 		searching: false, // Disable search
@@ -687,20 +612,97 @@
 
 </script>
 
-@section css {
+<script>
+	// Cập nhật giá trị pageSize khi thay đổi
+
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
+	});
+
+</script>
+
+<script>
+
+	document.getElementById('searchText').addEventListener('input', function () {
+		clearTimeout(debounceTimeout);
+		textSearch = this.value;
+		debounceTimeout = setTimeout(() => {
+			currentPage = 1;
+			renderTable(pageSize, currentPage);
+			renderPagging(pageSize, currentPage);
+		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+	});
+
+</script>
+
+<script>
+	document.getElementById('export-button').addEventListener('click', function () {
+
+		var startDate = $("#fromDate").val();
+		var endDate = $("#toDate").val();
+
+		// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+		if (!startDate || !endDate) {
+			alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+			return; // Dừng xử lý nếu không chọn đủ hai ngày
+		}
+
+		$("#loading-spinner").show();
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/ExportVinamGLJournalCombined", // Đường dẫn đến action trong controller
+			type: "POST",
+			data: {
+				fromDate: startDate,
+				toDate: endDate
+			},
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (data) {
+				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#export-button").prop("disabled", false);
+				var link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = 'ExportVinamGLJournalCombined.xlsx'; // Đặt tên file Excel
+				link.style.display = 'none';
+
+				document.body.appendChild(link);
+				link.click();
+
+				window.URL.revokeObjectURL(link.href);
+				document.body.removeChild(link);
+			}
+		});
+	});
+
+</script>
+
+<script>
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+</script>
+
+@section script {
 	<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
-	<link href="~/css/spinner.css" rel="stylesheet" />
-}
+	<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
 
-@section script {
-	<!-- form js -->
-	<!-- this page js -->
-	<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
 	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-	<script src="../../dist/js/custom.min.js"></script>
+	<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
 
 	<script>
 		// /*datwpicker*/
@@ -797,18 +799,6 @@
 
 					window.URL.revokeObjectURL(link.href);
 					document.body.removeChild(link);
-				}
-			});
-		});
-
-
-		document.addEventListener('DOMContentLoaded', function () {
-			// Chặn phím Enter cho form có id là 'export-form'
-			const form = document.getElementById('export-form');
-			form.addEventListener('keydown', function (event) {
-				if (event.key === 'Enter') {
-					event.preventDefault(); // Ngăn chặn hành động mặc định
-					return false;
 				}
 			});
 		});

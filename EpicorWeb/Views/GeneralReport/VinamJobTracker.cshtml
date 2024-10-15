@@ -340,37 +340,34 @@
 	</div>
 </div>
 <div id="myModalContainer"></div>
-<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">
-<link rel="stylesheet" type="text/css" href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-<link rel="stylesheet" type="text/css" href="~/dist/css/style.min.css">
 
-<!-- form js -->
-<!-- this page js -->
-<script src="../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
-<script src="../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
-<script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
-<link href="~/css/spinner.css" rel="stylesheet" />
-<script src="../../dist/js/custom.min.js"></script>
+<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
+
 <script>
 
-
 	// Chuyển dữ liệu từ server vào biến JavaScript
-	const data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+	let data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
 	console.log(data);
 	let currentPage = @CurrentPage;
 	let pageSize = @PageSize;
 	let textSearch = "";
 
-	document.addEventListener('DOMContentLoaded', function () {
-		// Chặn phím Enter cho form có id là 'export-form'
-		const form = document.getElementById('export-form');
-		form.addEventListener('keydown', function (event) {
-			if (event.key === 'Enter') {
-				event.preventDefault(); // Ngăn chặn hành động mặc định
-				return false;
-			}
-		});
-	});
+			// document.addEventListener('DOMContentLoaded', function () {
+			// 	// Chặn phím Enter cho form có id là 'export-form'
+			// 	const form = document.getElementById('export-form');
+			// 	form.addEventListener('keydown', function (event) {
+			// 		if (event.key === 'Enter') {
+			// 			event.preventDefault(); // Ngăn chặn hành động mặc định
+			// 			return false;
+			// 		}
+			// 	});
+			});
 	function filterData(data, searchText) {
 		return data.filter(item => {
 			const JobNum = (item.JobNum || "").toLowerCase().includes(searchText.toLowerCase());
@@ -392,131 +389,94 @@
 
 		paginatedItems.forEach(item => {
 			tableBody.innerHTML += `
-											<tr>
-								<td>${item.JobNum || ''}</td>
-								<td>${item.ActSetupHours || ''}</td>
-								<td>${item.OprSeq || ''}</td>
-								<td>${item.OpCode || ''}</td>
-								<td>${item.OpDesc || ''}</td>
-								<td>${item.SubContract || ''}</td>
-								<td>${item.RunQty || ''}</td>
-								<td>${item.QtyCompleted || ''}</td>
-								<td>${item.EstSetHours || ''}</td>
-								<td>${item.OpComplete || ''}</td>
-								<td>${item.StartDate || ''}</td>
-								<td>${item.EstProdHours || ''}</td>
-								<td>${item.DueDate || ''}</td>
-								<td>${item.ActProdHours || ''}</td>
-								<td>${item.ActLabCost || ''}</td>
-								<td>${item.ActBurCost || ''}</td>
-								<td>${item.EstSetHoursPerMch || ''}</td>
-								<td>${item.SetUpCrewSize || ''}</td>
-								<td>${item.ProdCrewSize || ''}</td>
-								<td>${item.ProdLabRate || ''}</td>
-								<td>${item.SetupLabRate || ''}</td>
-								<td>${item.QtyPer || ''}</td>
-								<td>${item.ProdStandard || ''}</td>
-								<td>${item.OpsPerPart || ''}</td>
-								<td>${item.FAQty || ''}</td>
-								<td>${item.AddedOper || ''}</td>
-								<td>${item.Machines || ''}</td>
-								<td>${item.FSJobStatus || ''}</td>
-								<td>${item.Instructions || ''}</td>
-								<td>${item.ProdUOM || ''}</td>
-								<td>${item.GeneralPlanInfo || ''}</td>
-								<td>${item.EstStdDescription || ''}</td>
-								<td>${item.JDFOpCompleted || ''}</td>
-								<td>${item.RemovedfromPlan || ''}</td>
-								<td>${item.EstStdType || ''}</td>
-								<td>${item.ExternalMES || ''}</td>
-								<td>${item.PctReg || ''}</td>
-								<td>${item.SetupMaterial || ''}</td>
-								<td>${item.MaterialColorRating || ''}</td>
-								<td>${item.MiscInfo1 || ''}</td>
-								<td>${item.MiscInfo2 || ''}</td>
-								<td>${item.SetupURL || ''}</td>
-								<td>${item.ExpPctUp || ''}</td>
-								<td>${item.ExpCycTm || ''}</td>
-								<td>${item.ExpGood || ''}</td>
-								<td>${item.NonProdLimit || ''}</td>
-								<td>${item.AutoSpcEnable || ''}</td>
-								<td>${item.AutoSpcPeriod || ''}</td>
-								<td>${item.PartQualEnable || ''}</td>
-								<td>${item.AutoSpcSubgroup || ''}</td>
-								<td>${item.MobileOperation || ''}</td>
-								<td>${item.ReWork || ''}</td>
-								<td>${item.RequestMove || ''}</td>
-								<td>${item.BookedUnitCost || ''}</td>
-								<td>${item.UserMapData || ''}</td>
-								<td>${item.RoughCutSched || ''}</td>
-								<td>${item.SchedComment || ''}</td>
-								<td>${item.ContractID || ''}</td>
-								<td>${item.PrinterID || ''}</td>
-								<td>${item.LastPrintedDate || ''}</td>
-								<td>${item.LastPCIDPrinted || ''}</td>
-								<td>${item.CurrentPkgCode || ''}</td>
-								<td>${item.ExternalMESSyncRequired || ''}</td>
-								<td>${item.ExternalMESLastSync || ''}</td>
-								<td>${item.QtyPerCycle || ''}</td>
-								<td>${item.Weight || ''}</td>
-								<td>${item.WeightUOM || ''}</td>
-								<td>${item.TearDwnEndDate || ''}</td>
-								<td>${item.TearDwnEndHour || ''}</td>
-								<td>${item.SendAheadType || ''}</td>
-								<td>${item.WITearDwnEndDate || ''}</td>
-								<td>${item.SendAheadOffset || ''}</td>
-								<td>${item.WITearDwnEndHour || ''}</td>
-								<td>${item.UseAllRoles || ''}</td>
-								<td>${item.AssetPartNum || ''}</td>
-								<td>${item.SerialNumber || ''}</td>
-								<td>${item.SNRequiredOpr || ''}</td>
-								<td>${item.SNRequiredSubConShip || ''}</td>
-								<td>${item.PartPricePerCode || ''}</td>
-								<td>${item.PartSalesUM || ''}</td>
-								<td>${item.PartSellingFactor || ''}</td>
-							</tr>
-											`;
+													<tr>
+										<td>${item.JobNum || ''}</td>
+										<td>${item.ActSetupHours || ''}</td>
+										<td>${item.OprSeq || ''}</td>
+										<td>${item.OpCode || ''}</td>
+										<td>${item.OpDesc || ''}</td>
+										<td>${item.SubContract || ''}</td>
+										<td>${item.RunQty || ''}</td>
+										<td>${item.QtyCompleted || ''}</td>
+										<td>${item.EstSetHours || ''}</td>
+										<td>${item.OpComplete || ''}</td>
+										<td>${item.StartDate || ''}</td>
+										<td>${item.EstProdHours || ''}</td>
+										<td>${item.DueDate || ''}</td>
+										<td>${item.ActProdHours || ''}</td>
+										<td>${item.ActLabCost || ''}</td>
+										<td>${item.ActBurCost || ''}</td>
+										<td>${item.EstSetHoursPerMch || ''}</td>
+										<td>${item.SetUpCrewSize || ''}</td>
+										<td>${item.ProdCrewSize || ''}</td>
+										<td>${item.ProdLabRate || ''}</td>
+										<td>${item.SetupLabRate || ''}</td>
+										<td>${item.QtyPer || ''}</td>
+										<td>${item.ProdStandard || ''}</td>
+										<td>${item.OpsPerPart || ''}</td>
+										<td>${item.FAQty || ''}</td>
+										<td>${item.AddedOper || ''}</td>
+										<td>${item.Machines || ''}</td>
+										<td>${item.FSJobStatus || ''}</td>
+										<td>${item.Instructions || ''}</td>
+										<td>${item.ProdUOM || ''}</td>
+										<td>${item.GeneralPlanInfo || ''}</td>
+										<td>${item.EstStdDescription || ''}</td>
+										<td>${item.JDFOpCompleted || ''}</td>
+										<td>${item.RemovedfromPlan || ''}</td>
+										<td>${item.EstStdType || ''}</td>
+										<td>${item.ExternalMES || ''}</td>
+										<td>${item.PctReg || ''}</td>
+										<td>${item.SetupMaterial || ''}</td>
+										<td>${item.MaterialColorRating || ''}</td>
+										<td>${item.MiscInfo1 || ''}</td>
+										<td>${item.MiscInfo2 || ''}</td>
+										<td>${item.SetupURL || ''}</td>
+										<td>${item.ExpPctUp || ''}</td>
+										<td>${item.ExpCycTm || ''}</td>
+										<td>${item.ExpGood || ''}</td>
+										<td>${item.NonProdLimit || ''}</td>
+										<td>${item.AutoSpcEnable || ''}</td>
+										<td>${item.AutoSpcPeriod || ''}</td>
+										<td>${item.PartQualEnable || ''}</td>
+										<td>${item.AutoSpcSubgroup || ''}</td>
+										<td>${item.MobileOperation || ''}</td>
+										<td>${item.ReWork || ''}</td>
+										<td>${item.RequestMove || ''}</td>
+										<td>${item.BookedUnitCost || ''}</td>
+										<td>${item.UserMapData || ''}</td>
+										<td>${item.RoughCutSched || ''}</td>
+										<td>${item.SchedComment || ''}</td>
+										<td>${item.ContractID || ''}</td>
+										<td>${item.PrinterID || ''}</td>
+										<td>${item.LastPrintedDate || ''}</td>
+										<td>${item.LastPCIDPrinted || ''}</td>
+										<td>${item.CurrentPkgCode || ''}</td>
+										<td>${item.ExternalMESSyncRequired || ''}</td>
+										<td>${item.ExternalMESLastSync || ''}</td>
+										<td>${item.QtyPerCycle || ''}</td>
+										<td>${item.Weight || ''}</td>
+										<td>${item.WeightUOM || ''}</td>
+										<td>${item.TearDwnEndDate || ''}</td>
+										<td>${item.TearDwnEndHour || ''}</td>
+										<td>${item.SendAheadType || ''}</td>
+										<td>${item.WITearDwnEndDate || ''}</td>
+										<td>${item.SendAheadOffset || ''}</td>
+										<td>${item.WITearDwnEndHour || ''}</td>
+										<td>${item.UseAllRoles || ''}</td>
+										<td>${item.AssetPartNum || ''}</td>
+										<td>${item.SerialNumber || ''}</td>
+										<td>${item.SNRequiredOpr || ''}</td>
+										<td>${item.SNRequiredSubConShip || ''}</td>
+										<td>${item.PartPricePerCode || ''}</td>
+										<td>${item.PartSalesUM || ''}</td>
+										<td>${item.PartSellingFactor || ''}</td>
+									</tr>
+													`;
 		});
 
 	}
-	document.getElementById('export-button').addEventListener('click', function () {
-		// Gửi dữ liệu bằng Ajax đến controller
-		$.ajax({
-			url: "/GeneralReport/ExportVinamJobTracker", // Đường dẫn đến action trong controller
-			type: "POST",
-			// data: {
-			// 	fromDate: startDate,
-			// 	toDate: endDate
-			// },
-			xhrFields: {
-				responseType: 'blob'
-			},
-			success: function (data) {
-				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-				$("#loading-spinner").hide();
-				// Kích hoạt lại button
-				$("#export-button").prop("disabled", false);
-				var link = document.createElement('a');
-				link.href = window.URL.createObjectURL(blob);
-				link.download = 'ExportVinamJobTracker.xlsx'; // Đặt tên file Excel
-				link.style.display = 'none';
 
-				document.body.appendChild(link);
-				link.click();
-
-				window.URL.revokeObjectURL(link.href);
-				document.body.removeChild(link);
-			}
-		});
-	});
-
-	document.getElementById('pageSizeSelect').addEventListener('change', function () {
-		pageSize = parseInt(this.value);
-		currentPage = 1; // Đặt lại trang hiện tại về 1
-		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-	});
 	function setActivePage(page) {
 		currentPage = page; // Cập nhật trang hiện tại
 		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
@@ -524,25 +484,7 @@
 	}
 	let debounceTimeout;
 
-	document.getElementById('searchText').addEventListener('input', function () {
-		clearTimeout(debounceTimeout);
-		textSearch = this.value;
-		debounceTimeout = setTimeout(() => {
-			currentPage = 1;
-			renderTable(pageSize, currentPage);
-			renderPagging(pageSize, currentPage);
-		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
-	});
 
-	// Cập nhật giá trị pageSize khi thay đổi
-	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
-		element.addEventListener('click', function () {
-			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
-			console.log(currentPage);
-			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
-			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
-		});
-	});
 	// Gọi hàm renderTable lần đầu để hiển thị dữ liệu ban đầu
 	renderTable(pageSize, currentPage);
 
@@ -639,6 +581,68 @@
 
 		paginationElement.appendChild(ul);
 	}
+</script>
+<script>
+	document.getElementById('export-button').addEventListener('click', function () {
+		// Gửi dữ liệu bằng Ajax đến controller
+		$.ajax({
+			url: "/GeneralReport/ExportVinamJobTracker", // Đường dẫn đến action trong controller
+			type: "POST",
+			// data: {
+			// 	fromDate: startDate,
+			// 	toDate: endDate
+			// },
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function (data) {
+				var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+				$("#loading-spinner").hide();
+				// Kích hoạt lại button
+				$("#export-button").prop("disabled", false);
+				var link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = 'ExportVinamJobTracker.xlsx'; // Đặt tên file Excel
+				link.style.display = 'none';
+
+				document.body.appendChild(link);
+				link.click();
+
+				window.URL.revokeObjectURL(link.href);
+				document.body.removeChild(link);
+			}
+		});
+	});
+
+
+</script>
+
+<script>
+
+	document.getElementById('pageSizeSelect').addEventListener('change', function () {
+		pageSize = parseInt(this.value);
+		currentPage = 1; // Đặt lại trang hiện tại về 1
+		renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+		renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+	});
+</script>
+<script>
+
+	document.getElementById('searchText').addEventListener('input', function () {
+		clearTimeout(debounceTimeout);
+		textSearch = this.value;
+		debounceTimeout = setTimeout(() => {
+			currentPage = 1;
+			renderTable(pageSize, currentPage);
+			renderPagging(pageSize, currentPage);
+		}, 300); // Trì hoãn 300ms trước khi thực hiện tìm kiếm
+	});
+
+
+</script>
+
+<script>
 	var table = $('#zero_config').DataTable({
 		paging: false, // Enable paging
 		searching: false, // Disable search
@@ -648,6 +652,18 @@
 		language: {
 			info: "",
 		}
+	});
+</script>
+
+<script>
+	// Cập nhật giá trị pageSize khi thay đổi
+	document.querySelectorAll('[name^="currentPage"]').forEach(function (element) {
+		element.addEventListener('click', function () {
+			currentPage = parseInt(this.textContent); // Lấy giá trị của trang từ nội dung
+			console.log(currentPage);
+			renderTable(pageSize, currentPage); // Gọi lại hàm renderTable
+			renderPagging(pageSize, currentPage); // Gọi lại hàm renderTable
+		});
 	});
 </script>
 
