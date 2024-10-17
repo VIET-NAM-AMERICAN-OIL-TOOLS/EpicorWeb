@@ -1,133 +1,208 @@
 ﻿@{
-    ViewData["Title"] = "Invoice All";
-    if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
-    {
-        Layout = null;
-    }
-    else
-    Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Invoice All";
+	if (Context.Request.Headers["x-requested-with"] == "XMLHttpRequest")
+	{
+		Layout = null;
+	}
+	else
+		Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="page-wrapper" style="background-color:#ffffff">
-    <div class="col-md-6 mt-3 ms-3">
-                    <h4 class="card-title pb-4">Invoice All</h4>
-                    <hr />
-                </div>
-    <div class="card col-md-6">
-        <form action="~/SPWBInvoiceAll/SPWBInvoiceAllShow" method="post" enctype="multipart/form-data">
-            <div class="card-body">
-                <h4 class="card-title">Lọc theo ngày</h4>
-                <label class="mt-3">From Date</label>
-                <div class="input-group">
-                    <input type="text" class="form-control datepicker-autoclose" id="fromDate" name="fromDate"
-                           placeholder="mm/dd/yyyy" autocomplete="off">
-                    <div class="input-group-append">
-                        <span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
-                    </div>
-                </div>
-                <label class="mt-3">To Date</label>
-                <div class="input-group">
-                    <input type="text" class="form-control datepicker-autoclose" id="toDate" name="toDate"
-                           placeholder="mm/dd/yyyy" autocomplete="off">
-                    <div class="input-group-append">
-                        <span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <p class="text-danger mt-3">
-                        @TempData["SPWBInvoiceAll_Error"]
-                        </>
-                </div>
-            </div>
-            <div class="border-top">
-                <div class="card-body">
-                    <button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;" id="export-button" name="export-button">
-                        Xuất Excel</button>
-                </div>
-            </div>
-        </form>
-        <!-- Hiệu ứng chờ -->
-        <div id="loading-spinner">
-            <div class="spinner"></div>
-        </div>
-    </div>
+	<div class="col-md-6 mt-3 ms-3">
+		<h4 class="card-title pb-4">Invoice All</h4>
+		<hr />
+	</div>
+	<div class="card col-md-6">
+		<form action="~/SPWBInvoiceAll/SPWBInvoiceAllShow" method="post" enctype="multipart/form-data">
+			<div class="card-body">
+				<h4 class="card-title">Lọc theo ngày</h4>
+				<label class="mt-3">From Date</label>
+				<div class="input-group">
+					<input type="text" class="form-control datepicker-autoclose" id="fromDate" name="fromDate"
+						   placeholder="mm/dd/yyyy" autocomplete="off">
+					<div class="input-group-append">
+						<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+					</div>
+				</div>
+				<label class="mt-3">To Date</label>
+				<div class="input-group">
+					<input type="text" class="form-control datepicker-autoclose" id="toDate" name="toDate"
+						   placeholder="mm/dd/yyyy" autocomplete="off">
+					<div class="input-group-append">
+						<span class="input-group-text h-100"><i class="fa fa-calendar"></i></span>
+					</div>
+				</div>
+				<div class="input-group">
+					<p class="text-danger mt-3">
+						@TempData["SPWBInvoiceAll_Error"]
+						</>
+				</div>
+			</div>
+			<div class="border-top">
+				<div class="card-body">
+					<button type="submit" class="btn btn-md btn-success text-white invoiceLoc" style="padding-left:2em; padding-right:2em;" id="export-button" name="export-button">
+						Xuất Excel
+					</button>
+				</div>
+			</div>
+		</form>
+		<!-- Hiệu ứng chờ -->
+		<div id="loading-spinner">
+			<div class="spinner"></div>
+		</div>
+	</div>
 </div>
+<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
 
-@section css{
-    <link rel="stylesheet" type="text/css"
-          href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
-    <link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
-    <link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
-    <link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
-    <link href="~/css/spinner.css" rel="stylesheet" />
-    }
+<script>
+	/*datwpicker*/
+	jQuery('.datepicker-autoclose').datepicker({
+		autoclose: true,
+		todayHighlight: true,
+		orientation: 'bottom'
+	});
+	// var quill = new Quill('#editor', {
+	//     theme: 'snow'
+	// });
 
-@section script{
-    <!-- form js -->
-    <script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
-    <script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-    <script src="../../dist/js/custom.min.js"></script>
-    <script>
-        /*datwpicker*/
-        jQuery('.datepicker-autoclose').datepicker({
-            autoclose: true,
-            todayHighlight: true,
-            orientation: 'bottom'
-        });
-        // var quill = new Quill('#editor', {
-        //     theme: 'snow'
-        // });
+</script>
+<script>
+	$(document).ready(function () {
+		$("form").submit(function (e) {
+			e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
 
-    </script>
-    <script>
-        $(document).ready(function () {
-            $("form").submit(function (e) {
-                e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+			var startDate = $("#fromDate").val();
+			var endDate = $("#toDate").val();
 
-                var startDate = $("#fromDate").val();
-                var endDate = $("#toDate").val();
+			// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+			if (!startDate || !endDate) {
+				alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+				return; // Dừng xử lý nếu không chọn đủ hai ngày
+			}
 
-                // Kiểm tra xem startDate và endDate đã được chọn hay chưa
-                if (!startDate || !endDate) {
-                    alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
-                    return; // Dừng xử lý nếu không chọn đủ hai ngày
-                }
+			// Hiển thị hiệu ứng chờ
+			$("#loading-spinner").show();
+			// Vô hiệu hóa button
+			$("#export-button").prop("disabled", true);
 
-                // Hiển thị hiệu ứng chờ
-                $("#loading-spinner").show();
-                // Vô hiệu hóa button
-                $("#export-button").prop("disabled", true);
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/SPWBInvoiceAll/SPWBInvoiceExportExcel", // Đường dẫn đến action trong controller
+				type: "POST",
+				data: {
+					startDate: startDate,
+					endDate: endDate
+				},
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (data) {
+					var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#export-button").prop("disabled", false);
+					var link = document.createElement('a');
+					link.href = window.URL.createObjectURL(blob);
+					link.download = 'InvoiceAll.xlsx'; // Đặt tên file Excel
+					link.style.display = 'none';
 
-                // Gửi dữ liệu bằng Ajax đến controller
-                $.ajax({
-                    url: "/SPWBInvoiceAll/SPWBInvoiceExportExcel", // Đường dẫn đến action trong controller
-                    type: "POST",
-                    data: {
-                        startDate: startDate,
-                        endDate: endDate
-                    },
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-                    success: function (data) {
-                        var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                        // Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-                        $("#loading-spinner").hide();
-                        // Kích hoạt lại button
-                        $("#export-button").prop("disabled", false);
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = 'InvoiceAll.xlsx'; // Đặt tên file Excel
-                        link.style.display = 'none';
+					document.body.appendChild(link);
+					link.click();
 
-                        document.body.appendChild(link);
-                        link.click();
+					window.URL.revokeObjectURL(link.href);
+					document.body.removeChild(link);
+				}
+			});
+		});
+	});
+</script>
 
-                        window.URL.revokeObjectURL(link.href);
-                        document.body.removeChild(link);
-                    }
-                });
-            });
-        });
-    </script>
-    }
+@section css {
+	<link rel="stylesheet" type="text/css"
+		  href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" />
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/css/spinner.css" rel="stylesheet" />
+}
+
+@section script {
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+	<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
+	<script>
+		/*datwpicker*/
+		jQuery('.datepicker-autoclose').datepicker({
+			autoclose: true,
+			todayHighlight: true,
+			orientation: 'bottom'
+		});
+		// var quill = new Quill('#editor', {
+		//     theme: 'snow'
+		// });
+
+	</script>
+	<script>
+		$(document).ready(function () {
+			$("form").submit(function (e) {
+				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+				var startDate = $("#fromDate").val();
+				var endDate = $("#toDate").val();
+
+				// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+				if (!startDate || !endDate) {
+					alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+					return; // Dừng xử lý nếu không chọn đủ hai ngày
+				}
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/SPWBInvoiceAll/SPWBInvoiceExportExcel", // Đường dẫn đến action trong controller
+					type: "POST",
+					data: {
+						startDate: startDate,
+						endDate: endDate
+					},
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'InvoiceAll.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	</script>
+}

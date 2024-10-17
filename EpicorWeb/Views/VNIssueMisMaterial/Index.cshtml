@@ -55,6 +55,135 @@
 	</div>
 </div>
 
+<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" />
+<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css" />
+<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css" />
+<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css" />
+<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
+<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
+
+
+
+ <script>
+     /*datwpicker*/
+     jQuery('.datepicker-autoclose').datepicker({
+         autoclose: true,
+         todayHighlight: true,
+         orientation: 'bottom'
+     });
+     // var quill = new Quill('#editor', {
+     //     theme: 'snow'
+     // });
+
+ </script>
+
+	<script>
+		$(document).ready(function () {
+			$("form").submit(function (e) {
+				e.preventDefault(); // Ngăn chặn form gửi dữ liệu một cách thông thường
+
+				var startDate = $("#fromDate").val();
+				var endDate = $("#toDate").val();
+
+				// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+				if (!startDate || !endDate) {
+					alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+					return; // Dừng xử lý nếu không chọn đủ hai ngày
+				}
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/VNIssueMisMaterial/VNIssueMisMaterialExportExcel", // Đường dẫn đến action trong controller
+					type: "POST",
+					data: {
+						startDate: startDate,
+						endDate: endDate
+					},
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'VinamIssueMiscMtls.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			// Sự kiện khi nút "Xuất Excel Mới" được nhấp
+			$("#export-excel-button").click(function () {
+				var startDate = $("#fromDate").val();
+				var endDate = $("#toDate").val();
+
+				// Kiểm tra xem startDate và endDate đã được chọn hay chưa
+				if (!startDate || !endDate) {
+					alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+					return; // Dừng xử lý nếu không chọn đủ hai ngày
+				}
+
+				// Hiển thị hiệu ứng chờ
+				$("#loading-spinner").show();
+				// Vô hiệu hóa button
+				$("#export-button").prop("disabled", true);
+				// Vô hiệu hóa nút "Xuất Excel Mới"
+				$("#export-excel-button").prop("disabled", true);
+
+				// Gửi dữ liệu bằng Ajax đến controller
+				$.ajax({
+					url: "/VinamPurchaseInvoiceList/VinamPurchaseInvoiceListExportExcelTK", // Đường dẫn đến action trong controller
+					type: "POST",
+					data: {
+						startDate: startDate,
+						endDate: endDate
+					},
+					xhrFields: {
+						responseType: 'blob'
+					},
+					success: function (data) {
+						var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+						// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+						$("#loading-spinner").hide();
+						// Kích hoạt lại button
+						$("#export-button").prop("disabled", false);
+						// Kích hoạt lại nút "Xuất Excel Mới"
+						$("#export-excel-button").prop("disabled", false);
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = 'VinamPurchaseInvoiceListTK.xlsx'; // Đặt tên file Excel
+						link.style.display = 'none';
+
+						document.body.appendChild(link);
+						link.click();
+
+						window.URL.revokeObjectURL(link.href);
+						document.body.removeChild(link);
+					}
+				});
+			});
+		});
+	</script>
 @section css {
 	<link rel="stylesheet" type="text/css"
 		  href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
@@ -65,10 +194,13 @@
 }
 
 @section script {
-	<!-- form js -->
-	<script src="~/assets/libs/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/quill/dist/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/select2/dist/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="~/assets/libs/jquery-minicolors/jquery.minicolors.css">
+	<link href="~/assets/libs/datatables/media/css/jquery.datatables.min.css" rel="stylesheet" />
 	<script src="~/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-	<script src="../../dist/js/custom.min.js"></script>
+	<script src="~/assets/libs/datatables/media/js/jquery.datatables.min.js"></script>
 	<script>
 		/*datwpicker*/
 		jQuery('.datepicker-autoclose').datepicker({

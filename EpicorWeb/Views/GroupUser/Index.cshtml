@@ -85,223 +85,223 @@
 <script src="../../dist/js/custom.min.js"></script>
 
 
-<script>
-	// Định nghĩa hàm gắn sự kiện click cho nút "Sửa"
-	function initUpdateButtonEvent() {
-		$('.btnUpdateGroup').off('click').on('click', function () {
+	<script>
+		// Định nghĩa hàm gắn sự kiện click cho nút "Sửa"
+		function initUpdateButtonEvent() {
+			$('.btnUpdateGroup').off('click').on('click', function () {
+				var id = $(this).data('id');
+				var name = $(this).data('name');
+				var description = $(this).data('description');
+				openEditGroupsModal(id, name, description);
+			});
+
+			$('.btnDecentralization').off('click').on('click', function () {
+				var id = $(this).data('id');
+				openEditGroupsModal1(id);
+			});
+		}
+
+		var table = $('#zero_config').DataTable({
+			"language": {
+				"paginate": {
+					"previous": "<<", // Thay đổi nút Previous thành <<
+					"next": ">>"      // Thay đổi nút Next thành >>
+				}
+			}
+		});
+		// Chỉ gọi initUpdateButtonEvent một lần sau khi DataTable khởi tạo
+		// table.on('init.dt', function() {
+		// initUpdateButtonEvent();
+		// Đính kèm sự kiện sau khi DataTable vẽ lại (bao gồm khi chuyển trang)
+		table.on('draw.dt', function () {
+			initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
+		});
+	</script>
+
+	<script>
+		$('#btnAddGroups').on('click', function () {
+			$.ajax({
+				url: '/GroupUserController/CreateGroup', // Đường dẫn đến controller và action
+				type: 'GET', // Loại yêu cầu (GET, POST, v.v.)
+				success: function (modalHtml) {
+					// Hiển thị modal trả về từ PartialView
+					$('#myModalContainer').html(modalHtml);
+					$('#addGroups').modal('show');
+				},
+				error: function () {
+					// Xử lý lỗi ở đây
+					alert('Đã xảy ra lỗi khi gọi controller.');
+				}
+			});
+		});
+	</script>
+
+	<script>
+		$('.btnUpdateGroup').on('click', function () {
 			var id = $(this).data('id');
 			var name = $(this).data('name');
 			var description = $(this).data('description');
+
 			openEditGroupsModal(id, name, description);
 		});
 
-		$('.btnDecentralization').off('click').on('click', function () {
-			var id = $(this).data('id');
-			openEditGroupsModal1(id);
-		});
-	}
-
-	var table = $('#zero_config').DataTable({
-		"language": {
-			"paginate": {
-				"previous": "<<", // Thay đổi nút Previous thành <<
-				"next": ">>"      // Thay đổi nút Next thành >>
-			}
-		}
-	});
-	// Chỉ gọi initUpdateButtonEvent một lần sau khi DataTable khởi tạo
-	// table.on('init.dt', function() {
-	// initUpdateButtonEvent();
-	// Đính kèm sự kiện sau khi DataTable vẽ lại (bao gồm khi chuyển trang)
-	table.on('draw.dt', function () {
-		initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
-	});
-</script>
-
-<script>
-	$('#btnAddGroups').on('click', function () {
-		$.ajax({
-			url: '/GroupUserController/CreateGroup', // Đường dẫn đến controller và action
-			type: 'GET', // Loại yêu cầu (GET, POST, v.v.)
-			success: function (modalHtml) {
-				// Hiển thị modal trả về từ PartialView
-				$('#myModalContainer').html(modalHtml);
-				$('#addGroups').modal('show');
-			},
-			error: function () {
-				// Xử lý lỗi ở đây
-				alert('Đã xảy ra lỗi khi gọi controller.');
-			}
-		});
-	});
-</script>
-
-<script>
-	$('.btnUpdateGroup').on('click', function () {
-		var id = $(this).data('id');
-		var name = $(this).data('name');
-		var description = $(this).data('description');
-
-		openEditGroupsModal(id, name, description);
-	});
-
-	function openEditGroupsModal(id, name, description) {
-		$.ajax({
-			url: '/GroupUserController/EditGroup',
-			type: 'GET',
-			data: { id: id, name: name, description: description },
-			success: function (modalHtml) {
-				$('#myModalContainer').html(modalHtml);
-				$('#editGroups').modal('show');
-			},
-			error: function () {
-				alert('Đã xảy ra lỗi khi gọi controller.');
-			}
-		});
-	}
-
-</script>
-
-<script>
-	$('#zero_config tbody').on('click', '.btnDeleteGroup', function () {
-		var id = $(this).data('id');
-		var name = $(this).data('name');
-		var confirmation = confirm('Bạn có chắc chắn muốn xóa nhóm "' + name + '" ?');
-
-		if (confirmation) {
-			// Gọi AJAX để xóa nhóm
+		function openEditGroupsModal(id, name, description) {
 			$.ajax({
-				url: '/GroupUserController/DeleteGroup', // Đường dẫn đến action xóa nhóm
-				type: 'POST',
-				data: { id: id },
-				success: function (result) {
-					if (result.success) {
-						// Xóa dòng tương ứng khỏi bảng sau khi xóa thành công
-						alert('Thông báo: ' + result.message);
-
-						// Reload lại trang
-						window.location.reload();
-					} else {
-						alert('Đã xảy ra lỗi khi xóa nhóm: ' + result.message);
-					}
+				url: '/GroupUserController/EditGroup',
+				type: 'GET',
+				data: { id: id, name: name, description: description },
+				success: function (modalHtml) {
+					$('#myModalContainer').html(modalHtml);
+					$('#editGroups').modal('show');
 				},
 				error: function () {
 					alert('Đã xảy ra lỗi khi gọi controller.');
 				}
 			});
 		}
-	});
-</script>
 
-<script>
-	$('.btnDecentralization').off('click').on('click', function () {
-		var id = $(this).data('id');
+	</script>
 
-		openEditGroupsModal1(id);
-	});
+	<script>
+		$('#zero_config tbody').on('click', '.btnDeleteGroup', function () {
+			var id = $(this).data('id');
+			var name = $(this).data('name');
+			var confirmation = confirm('Bạn có chắc chắn muốn xóa nhóm "' + name + '" ?');
 
-	// Function để mở modal và load Partial View
-	function openEditGroupsModal1(id) {
-		$.ajax({
-			url: '/GroupUserController/DecentralizationGroup',
-			type: 'GET',
-			data: { id: id },
-			success: function (modalHtml) {
-				$('#myModalContainer').html(modalHtml);
-				$('#editGroups').modal('show');
+			if (confirmation) {
+				// Gọi AJAX để xóa nhóm
+				$.ajax({
+					url: '/GroupUserController/DeleteGroup', // Đường dẫn đến action xóa nhóm
+					type: 'POST',
+					data: { id: id },
+					success: function (result) {
+						if (result.success) {
+							// Xóa dòng tương ứng khỏi bảng sau khi xóa thành công
+							alert('Thông báo: ' + result.message);
 
-				// Gán sự kiện click cho nút 'btnDecentralization'
-				$('#myModalContainer').off('click').on('click', '#btnDecentralization', function () {
-
-					// Thu thập các checkbox đã chọn
-					var selectedIDs = [];
-					$('.checkbox-list input[type=checkbox]:checked').each(function () {
-						selectedIDs.push($(this).attr('id'));
-					});
-
-
-					// Gửi các ID đã chọn đến controller qua AJAX
-					$.ajax({
-						url: '/GroupUserController/DecentralizationGroup',
-						type: 'POST',
-						traditional: true,
-						data: { selectedIDs: selectedIDs, GroupID: id }, // Gửi danh sách các ID đã chọn
-						success: function (response) {
-							alert('Phân quyền thành công');
 							// Reload lại trang
 							window.location.reload();
-						},
-						error: function () {
-							alert('Đã xảy ra lỗi khi gọi controller.');
-						}
-					});
-
-				});
-			},
-			error: function () {
-				alert('Đã xảy ra lỗi khi gọi controller.');
-			}
-		});
-	}
-
-</script>
-
-<script>
-	// Check mục con khi check mục cha
-	function checkChildren(checkbox) {
-		var listItem = checkbox.closest('li');
-		var childrenCheckboxes = listItem.querySelectorAll('input[type="checkbox"]');
-		childrenCheckboxes.forEach(function (childCheckbox) {
-			childCheckbox.checked = checkbox.checked;
-		});
-	}
-</script>
-
-<script>
-	function initializeTreeEvents() {
-		var treeItems = document.querySelectorAll('.tree li:has(ul)');
-
-		treeItems.forEach(function (item) {
-			item.classList.add('parent_li');
-			var span = item.querySelector('span');
-			if (span) {
-				span.setAttribute('title', 'Collapse this branch');
-
-				var icon = span.querySelector('i');
-				if (icon) {
-					icon.addEventListener('click', function (e) {
-						e.stopPropagation();
-						var children = item.querySelectorAll('ul > li');
-
-						var isVisible = false;
-						for (var i = 0; i < children.length; i++) {
-							if (children[i].style.display !== 'none') {
-								isVisible = true;
-								break;
-							}
-						}
-
-						if (isVisible) {
-							Array.prototype.forEach.call(children, function (child) {
-								child.style.display = 'none';
-							});
-							span.setAttribute('title', 'Expand this branch');
-							icon.classList.remove('fa-minus-square');
-							icon.classList.add('fa-plus-square');
 						} else {
-							Array.prototype.forEach.call(children, function (child) {
-								child.style.display = 'block';
-							});
-							span.setAttribute('title', 'Collapse this branch');
-							icon.classList.remove('fa-plus-square');
-							icon.classList.add('fa-minus-square');
+							alert('Đã xảy ra lỗi khi xóa nhóm: ' + result.message);
 						}
-					});
-				}
+					},
+					error: function () {
+						alert('Đã xảy ra lỗi khi gọi controller.');
+					}
+				});
 			}
 		});
-	}
-</script>
+	</script>
+
+	<script>
+		$('.btnDecentralization').off('click').on('click', function () {
+			var id = $(this).data('id');
+
+			openEditGroupsModal1(id);
+		});
+
+		// Function để mở modal và load Partial View
+		function openEditGroupsModal1(id) {
+			$.ajax({
+				url: '/GroupUserController/DecentralizationGroup',
+				type: 'GET',
+				data: { id: id },
+				success: function (modalHtml) {
+					$('#myModalContainer').html(modalHtml);
+					$('#editGroups').modal('show');
+
+					// Gán sự kiện click cho nút 'btnDecentralization'
+					$('#myModalContainer').off('click').on('click', '#btnDecentralization', function () {
+
+						// Thu thập các checkbox đã chọn
+						var selectedIDs = [];
+						$('.checkbox-list input[type=checkbox]:checked').each(function () {
+							selectedIDs.push($(this).attr('id'));
+						});
+
+
+						// Gửi các ID đã chọn đến controller qua AJAX
+						$.ajax({
+							url: '/GroupUserController/DecentralizationGroup',
+							type: 'POST',
+							traditional: true,
+							data: { selectedIDs: selectedIDs, GroupID: id }, // Gửi danh sách các ID đã chọn
+							success: function (response) {
+								alert('Phân quyền thành công');
+								// Reload lại trang
+								window.location.reload();
+							},
+							error: function () {
+								alert('Đã xảy ra lỗi khi gọi controller.');
+							}
+						});
+
+					});
+				},
+				error: function () {
+					alert('Đã xảy ra lỗi khi gọi controller.');
+				}
+			});
+		}
+
+	</script>
+
+	<script>
+		// Check mục con khi check mục cha
+		function checkChildren(checkbox) {
+			var listItem = checkbox.closest('li');
+			var childrenCheckboxes = listItem.querySelectorAll('input[type="checkbox"]');
+			childrenCheckboxes.forEach(function (childCheckbox) {
+				childCheckbox.checked = checkbox.checked;
+			});
+		}
+	</script>
+
+	<script>
+		function initializeTreeEvents() {
+			var treeItems = document.querySelectorAll('.tree li:has(ul)');
+
+			treeItems.forEach(function (item) {
+				item.classList.add('parent_li');
+				var span = item.querySelector('span');
+				if (span) {
+					span.setAttribute('title', 'Collapse this branch');
+
+					var icon = span.querySelector('i');
+					if (icon) {
+						icon.addEventListener('click', function (e) {
+							e.stopPropagation();
+							var children = item.querySelectorAll('ul > li');
+
+							var isVisible = false;
+							for (var i = 0; i < children.length; i++) {
+								if (children[i].style.display !== 'none') {
+									isVisible = true;
+									break;
+								}
+							}
+
+							if (isVisible) {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'none';
+								});
+								span.setAttribute('title', 'Expand this branch');
+								icon.classList.remove('fa-minus-square');
+								icon.classList.add('fa-plus-square');
+							} else {
+								Array.prototype.forEach.call(children, function (child) {
+									child.style.display = 'block';
+								});
+								span.setAttribute('title', 'Collapse this branch');
+								icon.classList.remove('fa-plus-square');
+								icon.classList.add('fa-minus-square');
+							}
+						});
+					}
+				}
+			});
+		}
+	</script>
 
 @section css {
 	<link rel="stylesheet" type="text/css" href="~/assets/extra-libs/multicheck/multicheck.css">

@@ -44,11 +44,106 @@
 <script src="../../assets/extra-libs/DataTables/datatables.min.js"></script>
 <link href="~/css/spinner.css" rel="stylesheet" />
 <script src="../../dist/js/custom.min.js"></script>
-<script>
+	<script>
 
-	// Định nghĩa hàm gắn sự kiện click cho nút "Sửa"
-	function initUpdateButtonEvent() {
-		$('.btnEditUser').off('click').on('click', function () {
+		// Định nghĩa hàm gắn sự kiện click cho nút "Sửa"
+		function initUpdateButtonEvent() {
+			$('.btnEditUser').off('click').on('click', function () {
+				var id = $(this).data('id');
+				var name = $(this).data('name');
+				var groupname = $(this).data('groupname');
+				var groupid = $(this).data('groupid');
+
+				openEditGroupsModal(id, name, groupname, groupid);
+			});
+		}
+
+
+	</script>
+
+	<script>
+		var table = $('#zero_config').DataTable({
+			"language": {
+				"paginate": {
+					"previous": "<<", // Thay đổi nút Previous thành <<
+					"next": ">>"      // Thay đổi nút Next thành >>
+				}
+			}
+		});
+		table.on('draw.dt', function () {
+			initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
+		});
+	</script>
+
+	<script>
+		document.getElementById('btnUpdateUsers').addEventListener('click', function () {
+
+			// Hiển thị hiệu ứng chờ
+			$("#loading-spinner").show();
+			// Vô hiệu hóa button
+			$("#btnUpdateUsers").prop("disabled", true);
+
+			// Gửi dữ liệu bằng Ajax đến controller
+			$.ajax({
+				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+				type: "POST",
+				success: function (data) {
+					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#btnUpdateUsers").prop("disabled", false);
+					// Xử lý kết quả từ controller
+					$("#resultMessage").text("Update được " + data + " dòng.");
+				},
+				error: function () {
+					// Ẩn hiệu ứng chờ nếu có lỗi
+					$("#loading-spinner").hide();
+					// Kích hoạt lại button
+					$("#btnUpdateUsers").prop("disabled", false);
+					//-------------------------------------------------------
+					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+				}
+			});
+		});
+		// $(document).ready(function () {
+		// 	$("form").submit(function (e) {
+		// 		e.preventDefault(); // Ngăn c
+		// 		// Sự kiện khi nút "Xuất Excel Mới" được nhấp
+		// 		$("#btnUpdateUsers").click(function () {
+
+		// 			// Hiển thị hiệu ứng chờ
+		// 			$("#loading-spinner").show();
+		// 			// Vô hiệu hóa button
+		// 			$("#btnUpdateUsers").prop("disabled", true);
+
+		// 			// Gửi dữ liệu bằng Ajax đến controller
+		// 			$.ajax({
+		// 				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
+		// 				type: "POST",
+		// 				success: function (data) {
+		// 					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
+		// 					$("#loading-spinner").hide();
+		// 					// Kích hoạt lại button
+		// 					$("#btnUpdateUsers").prop("disabled", false);
+		// 					// Xử lý kết quả từ controller
+		// 					$("#resultMessage").text("Update được " + data + " dòng.");
+		// 				},
+		// 				error: function () {
+		// 					// Ẩn hiệu ứng chờ nếu có lỗi
+		// 					$("#loading-spinner").hide();
+		// 					// Kích hoạt lại button
+		// 					$("#btnUpdateUsers").prop("disabled", false);
+		// 					//-------------------------------------------------------
+		// 					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
+		// 				}
+		// 			});
+		// 		});
+		// 	});
+		// });
+	</script>
+
+	<script>
+		$('.btnEditUser').on('click', function () {
 			var id = $(this).data('id');
 			var name = $(this).data('name');
 			var groupname = $(this).data('groupname');
@@ -56,118 +151,23 @@
 
 			openEditGroupsModal(id, name, groupname, groupid);
 		});
-	}
 
-
-</script>
-
-<script>
-	var table = $('#zero_config').DataTable({
-		"language": {
-			"paginate": {
-				"previous": "<<", // Thay đổi nút Previous thành <<
-				"next": ">>"      // Thay đổi nút Next thành >>
-			}
+		function openEditGroupsModal(id, name, groupname, groupid) {
+			$.ajax({
+				url: '/UsersController/EditUsers',
+				type: 'GET',
+				data: { id: id, name: name, groupname: groupname, groupid: groupid },
+				success: function (modalHtml) {
+					$('#myModalContainer').html(modalHtml);
+					$('#editGroups').modal('show');
+				},
+				error: function () {
+					alert('Đã xảy ra lỗi khi gọi controller.');
+				}
+			});
 		}
-	});
-	table.on('draw.dt', function () {
-		initUpdateButtonEvent(); // Gọi hàm mỗi khi bảng vẽ lại
-	});
-</script>
 
-<script>
-	document.getElementById('btnUpdateUsers').addEventListener('click', function () {
-
-		// Hiển thị hiệu ứng chờ
-		$("#loading-spinner").show();
-		// Vô hiệu hóa button
-		$("#btnUpdateUsers").prop("disabled", true);
-
-		// Gửi dữ liệu bằng Ajax đến controller
-		$.ajax({
-			url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
-			type: "POST",
-			success: function (data) {
-				// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-				$("#loading-spinner").hide();
-				// Kích hoạt lại button
-				$("#btnUpdateUsers").prop("disabled", false);
-				// Xử lý kết quả từ controller
-				$("#resultMessage").text("Update được " + data + " dòng.");
-			},
-			error: function () {
-				// Ẩn hiệu ứng chờ nếu có lỗi
-				$("#loading-spinner").hide();
-				// Kích hoạt lại button
-				$("#btnUpdateUsers").prop("disabled", false);
-				//-------------------------------------------------------
-				$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
-			}
-		});
-	});
-	// $(document).ready(function () {
-	// 	$("form").submit(function (e) {
-	// 		e.preventDefault(); // Ngăn c
-	// 		// Sự kiện khi nút "Xuất Excel Mới" được nhấp
-	// 		$("#btnUpdateUsers").click(function () {
-
-	// 			// Hiển thị hiệu ứng chờ
-	// 			$("#loading-spinner").show();
-	// 			// Vô hiệu hóa button
-	// 			$("#btnUpdateUsers").prop("disabled", true);
-
-	// 			// Gửi dữ liệu bằng Ajax đến controller
-	// 			$.ajax({
-	// 				url: "/UsersController/UpdateUsers", // Đường dẫn đến action trong controller
-	// 				type: "POST",
-	// 				success: function (data) {
-	// 					// Ẩn hiệu ứng chờ sau khi nhận kết quả từ controller
-	// 					$("#loading-spinner").hide();
-	// 					// Kích hoạt lại button
-	// 					$("#btnUpdateUsers").prop("disabled", false);
-	// 					// Xử lý kết quả từ controller
-	// 					$("#resultMessage").text("Update được " + data + " dòng.");
-	// 				},
-	// 				error: function () {
-	// 					// Ẩn hiệu ứng chờ nếu có lỗi
-	// 					$("#loading-spinner").hide();
-	// 					// Kích hoạt lại button
-	// 					$("#btnUpdateUsers").prop("disabled", false);
-	// 					//-------------------------------------------------------
-	// 					$("#resultMessage").text("Đã xảy ra lỗi khi gửi yêu cầu.");
-	// 				}
-	// 			});
-	// 		});
-	// 	});
-	// });
-</script>
-
-<script>
-	$('.btnEditUser').on('click', function () {
-		var id = $(this).data('id');
-		var name = $(this).data('name');
-		var groupname = $(this).data('groupname');
-		var groupid = $(this).data('groupid');
-
-		openEditGroupsModal(id, name, groupname, groupid);
-	});
-
-	function openEditGroupsModal(id, name, groupname, groupid) {
-		$.ajax({
-			url: '/UsersController/EditUsers',
-			type: 'GET',
-			data: { id: id, name: name, groupname: groupname, groupid: groupid },
-			success: function (modalHtml) {
-				$('#myModalContainer').html(modalHtml);
-				$('#editGroups').modal('show');
-			},
-			error: function () {
-				alert('Đã xảy ra lỗi khi gọi controller.');
-			}
-		});
-	}
-
-</script>
+	</script>
 
 
 @section css {
