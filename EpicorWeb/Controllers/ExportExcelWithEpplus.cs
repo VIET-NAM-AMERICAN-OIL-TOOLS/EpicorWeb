@@ -388,6 +388,112 @@ namespace EpicorWeb.Controllers
             return memoryStream.ToArray();
         }
 
+        public byte[] ExportExcelWithEpplusForPriceList1<T>(List<T> data)
+        {
+            // Chuyển đổi danh sách thành DataTable
+            DataTable table = ConvertToDataTable(data);
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            // Tạo tập tin Excel với chế độ đệm
+            using ExcelPackage excel = new();
+            excel.Workbook.Worksheets.Add("Sheet1");
+            var worksheet = excel.Workbook.Worksheets["Sheet1"];
+            for (int i = 1; i <= table.Columns.Count; i++)
+            {
+                worksheet.Columns[1].Width = 16;
+                worksheet.Columns[2].Width = 16;
+                worksheet.Columns[3].Width = 16;
+                worksheet.Columns[4].Width = 16;
+                worksheet.Columns[5].Width = 16;
+                worksheet.Columns[6].Width = 16;
+                worksheet.Columns[7].Width = 40;
+            }
+            //worksheet.Cells["A1:A500"].Style.Numberformat.Format = "#,##0";
+            //worksheet.Cells.LoadFromDataTable(table, false, OfficeOpenXml.Table.TableStyles.Medium2);
+            worksheet.Column(1).Style.Numberformat.Format = "@";
+            worksheet.Column(2).Style.Numberformat.Format = "@";
+            worksheet.Column(3).Style.Numberformat.Format = "#,###,###,###,###";
+            worksheet.Column(4).Style.Numberformat.Format = "dd/MM/yyyy";
+            worksheet.Column(5).Style.Numberformat.Format = "#,###,###,###.####0";
+            worksheet.Column(6).Style.Numberformat.Format = "#,###,###,###.####0";
+            worksheet.Column(7).Style.Numberformat.Format = "@";
+
+            // Trích xuất danh sách tên cột từ dữ liệu (data)
+            var properties = typeof(T).GetProperties();
+            List<string> columnHeaders = new List<string>();
+            foreach (var property in properties)
+            {
+                columnHeaders.Add(property.Name);
+            }
+
+            // Định dạng dòng đầu tiên là kiểu chuỗi (string)
+            worksheet.Row(1).Style.Numberformat.Format = "@";
+            worksheet.Row(1).Style.Font.Bold = true;
+            worksheet.Row(1).Style.Font.Size = 12;
+
+            string[] fixedColumnHeaders = { "Company", "PartNum", "VendorNum", "EffectiveDate", "BreakQty", "PriceModifier", "SysRowID" };
+
+            // Bổ sung tiêu đề cho các cột
+            for (int i = 0; i < fixedColumnHeaders.Length; i++)
+            {
+                var headerCell = worksheet.Cells[1, i + 1];
+                headerCell.Value = fixedColumnHeaders[i];
+                headerCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                headerCell.Style.Font.Bold = true;
+                headerCell.Style.Font.Color.SetColor(System.Drawing.Color.Black);
+                headerCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                headerCell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.DarkCyan);
+                headerCell.Value = fixedColumnHeaders[i].ToUpper();
+            }
+
+
+            int row = 2; // Bắt đầu từ dòng thứ hai
+            foreach (var item in data)
+            {
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    var value = properties[i].GetValue(item);
+                    worksheet.Cells[row, i + 1].Value = value;
+                }
+                row++;
+            }
+
+            // Tô màu cho các cột (ví dụ: cột 1 và 2 có màu xanh)
+            int[] coloredColumns = { 1, 2, 3, 4 }; // Chỉ số cột bạn muốn tô màu
+            foreach (int columnIndex in coloredColumns)
+            {
+                using (var range = worksheet.Cells[1, columnIndex, table.Rows.Count + 1, columnIndex])
+                {
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(Color.PaleTurquoise);
+                }
+            }
+
+            int[] coloredColumns1 = { 7 }; // Chỉ số cột bạn muốn tô màu
+            foreach (int columnIndex in coloredColumns1)
+            {
+                using (var range = worksheet.Cells[1, columnIndex, table.Rows.Count + 1, columnIndex])
+                {
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(Color.LemonChiffon);
+                }
+            }
+
+            // Thêm border (kẻ dòng) cho toàn bộ dữ liệu
+            using (var range = worksheet.Cells[1, 1, table.Rows.Count + 1, table.Columns.Count])
+            {
+                range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+            }
+
+
+            using MemoryStream memoryStream = new();
+            excel.SaveAs(memoryStream);
+            return memoryStream.ToArray();
+        }
+
+
         /// <summary>
         /// Xuất excel Purchase Invoice List VN Tham khảo
         /// </summary>
